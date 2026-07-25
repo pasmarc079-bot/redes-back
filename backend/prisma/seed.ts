@@ -1,5 +1,8 @@
 import { PrismaClient, UserRole, BadgeType, EventStatus, PostStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 
@@ -20,11 +23,12 @@ async function main() {
   await prisma.socialConfig.deleteMany();
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
   const admin = await prisma.user.create({
     data: {
-      username: 'admin',
-      email: 'admin@ministerioredes.com',
+      username: process.env.ADMIN_USERNAME || 'admin',
+      email: process.env.ADMIN_EMAIL || 'admin@ministerioredes.com',
       passwordHash: hashedPassword,
       firstName: 'Administrador',
       lastName: 'REDES',
@@ -36,7 +40,8 @@ async function main() {
   console.log('✅ Admin user created');
 
   // Create editor user
-  const editorPassword = await bcrypt.hash('editor123', 10);
+  const editorPwd = process.env.EDITOR_PASSWORD || 'changeme123';
+  const editorPassword = await bcrypt.hash(editorPwd, 10);
   const editor = await prisma.user.create({
     data: {
       username: 'editor',
