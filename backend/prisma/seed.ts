@@ -85,21 +85,7 @@ async function main() {
   ]);
   console.log('✅ Badges created');
 
-  // Assign badge to member
-  const member = await prisma.member.findUnique({
-    where: { userId: memberUser.id },
-  });
-  if (member) {
-    await prisma.memberBadge.create({
-      data: {
-        memberId: member.id,
-        badgeId: badges[0].id,
-        notes: 'Voluntario en Exaltando al Padre 2024',
-        createdById: admin.id,
-      },
-    });
-    console.log('✅ Badge assigned to member');
-  }
+
 
   // Create events
   await prisma.event.create({
