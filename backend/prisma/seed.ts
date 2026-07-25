@@ -39,23 +39,6 @@ async function main() {
   });
   console.log('✅ Admin user created');
 
-  // Create editor user
-  const editorPwd = process.env.EDITOR_PASSWORD || 'changeme123';
-  const editorPassword = await bcrypt.hash(editorPwd, 10);
-  const editor = await prisma.user.create({
-    data: {
-      username: 'editor',
-      email: 'editor@ministerioredes.com',
-      passwordHash: editorPassword,
-      firstName: 'Editor',
-      lastName: 'REDES',
-      roles: {
-        create: [{ role: UserRole.EDITOR }],
-      },
-    },
-  });
-  console.log('✅ Editor user created');
-
   // Create member
   const memberUser = await prisma.user.create({
     data: {
@@ -193,7 +176,7 @@ async function main() {
       slug: 'el-poder-de-la-adoracion-en-comunidad',
       excerpt: 'Cuando nos reunimos para adorar juntos, algo sobrenatural sucede...',
       content: '<p>Cuando nos reunimos para adorar juntos, algo sobrenatural sucede. La presencia de Dios se manifiesta de una manera especial...</p>',
-      authorId: editor.id,
+      authorId: admin.id,
       status: PostStatus.PUBLISHED,
       publishedAt: new Date('2026-07-01'),
       readTime: 5,
@@ -208,7 +191,7 @@ async function main() {
       slug: 'bautismos-decision-que-marca',
       excerpt: 'El bautismo no es solo un acto simbólico, es una declaración pública de fe.',
       content: '<p>El bautismo no es solo un acto simbólico, es una declaración pública de fe...</p>',
-      authorId: editor.id,
+      authorId: admin.id,
       status: PostStatus.PUBLISHED,
       publishedAt: new Date('2026-04-12'),
       readTime: 7,
