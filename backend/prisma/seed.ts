@@ -28,7 +28,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       username: process.env.ADMIN_USERNAME || 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@ministerioredes.com',
+      email: process.env.ADMIN_EMAIL || 'admin@ministerioredes.org',
       passwordHash: hashedPassword,
       firstName: 'Administrador',
       lastName: 'REDES',
@@ -39,29 +39,6 @@ async function main() {
   });
   console.log('✅ Admin user created');
 
-  // Create member
-  const memberUser = await prisma.user.create({
-    data: {
-      username: 'miembro1',
-      email: 'miembro@ministerioredes.com',
-      passwordHash: hashedPassword,
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      roles: {
-        create: [{ role: UserRole.VIEWER }],
-      },
-      member: {
-        create: {
-          phone: '0994538859',
-          bio: 'Miembro activo del Ministerio REDES',
-          joinDate: new Date('2024-01-15'),
-          groupName: 'Grupo Esperanza',
-          status: 'active',
-        },
-      },
-    },
-  });
-  console.log('✅ Member created');
 
   // Create badges
   const badges = await Promise.all([
