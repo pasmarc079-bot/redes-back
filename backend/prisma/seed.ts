@@ -52,48 +52,43 @@ async function main() {
   });
   console.log('✅ Editor user created');
 
-  const badges = await Promise.all([
-    prisma.badge.create({
-      data: {
-        name: 'Voluntario del Evento',
-        slug: 'voluntario-del-evento',
-        description: 'Otorgado a quienes sirvieron como voluntarios en un evento',
-        type: BadgeType.VOLUNTEER,
-        color: '#C9A84C',
-        criteria: 'Participar como voluntario en al menos 1 evento',
-      },
-    }),
-    prisma.badge.create({
-      data: {
-        name: 'Líder de Grupo',
-        slug: 'lider-de-grupo',
-        description: 'Otorgado a los líderes de grupos celulares',
-        type: BadgeType.LEADER,
-        color: '#B8860B',
-        criteria: 'Ser asignado como líder de un grupo celular',
-      },
-    }),
-    prisma.badge.create({
-      data: {
-        name: 'Primer Bautismo',
-        slug: 'primer-bautismo',
-        description: 'Otorgado al momento del bautismo',
-        type: BadgeType.MILESTONE,
-        color: '#4A7C59',
-        criteria: 'Haber sido bautizado',
-      },
-    }),
-    prisma.badge.create({
-      data: {
-        name: 'Coro de Adoración',
-        slug: 'coro-de-adoracion',
-        description: 'Miembro del equipo de adoración y alabanza',
-        type: BadgeType.SERVICE,
-        color: '#6B2FA0',
-        criteria: 'Ser parte del equipo de adoración',
-      },
-    }),
-  ]);
+  const badges = [];
+  for (const b of [
+    {
+      name: 'Voluntario del Evento',
+      slug: 'voluntario-del-evento',
+      description: 'Otorgado a quienes sirvieron como voluntarios en un evento',
+      type: BadgeType.VOLUNTEER,
+      color: '#C9A84C',
+      criteria: 'Participar como voluntario en al menos 1 evento',
+    },
+    {
+      name: 'Líder de Grupo',
+      slug: 'lider-de-grupo',
+      description: 'Otorgado a los líderes de grupos celulares',
+      type: BadgeType.LEADER,
+      color: '#B8860B',
+      criteria: 'Ser asignado como líder de un grupo celular',
+    },
+    {
+      name: 'Primer Bautismo',
+      slug: 'primer-bautismo',
+      description: 'Otorgado al momento del bautismo',
+      type: BadgeType.MILESTONE,
+      color: '#4A7C59',
+      criteria: 'Haber sido bautizado',
+    },
+    {
+      name: 'Coro de Adoración',
+      slug: 'coro-de-adoracion',
+      description: 'Miembro del equipo de adoración y alabanza',
+      type: BadgeType.SERVICE,
+      color: '#6B2FA0',
+      criteria: 'Ser parte del equipo de adoración',
+    },
+  ]) {
+    badges.push(await prisma.badge.create({ data: b }));
+  }
   console.log('✅ Badges created');
 
   await prisma.event.create({
@@ -133,12 +128,15 @@ async function main() {
   });
   console.log('✅ Events created');
 
-  const tags = await Promise.all([
-    prisma.tag.create({ data: { name: 'Adoración', slug: 'adoracion', color: '#C9A84C' } }),
-    prisma.tag.create({ data: { name: 'Familia', slug: 'familia', color: '#4A7C59' } }),
-    prisma.tag.create({ data: { name: 'Reflexión', slug: 'reflexion', color: '#B8860B' } }),
-    prisma.tag.create({ data: { name: 'Eventos', slug: 'eventos', color: '#6B2FA0' } }),
-  ]);
+  const tags = [];
+  for (const t of [
+    { name: 'Adoración', slug: 'adoracion', color: '#C9A84C' },
+    { name: 'Familia', slug: 'familia', color: '#4A7C59' },
+    { name: 'Reflexión', slug: 'reflexion', color: '#B8860B' },
+    { name: 'Eventos', slug: 'eventos', color: '#6B2FA0' },
+  ]) {
+    tags.push(await prisma.tag.create({ data: t }));
+  }
   console.log('✅ Tags created');
 
   const post1 = await prisma.blogPost.create({
@@ -180,9 +178,8 @@ async function main() {
   await prisma.socialConfig.createMany({
     data: [
       { platform: 'facebook', accountUrl: 'https://www.facebook.com/MinisterioREDESlive', isActive: true },
-      { platform: 'youtube', accountUrl: 'https://youtube.com/channel/UClpoz4Olk2soO3Cg2gUKWKA', isActive: true },
-      { platform: 'tiktok', accountUrl: 'https://www.tiktok.com/@ministerioredes', isActive: true },
-      { platform: 'instagram', accountUrl: 'https://www.instagram.com/ministerioredes', isActive: true },
+      { platform: 'tiktok', accountUrl: 'https://www.tiktok.com/@ministerioredes2', isActive: true },
+      { platform: 'instagram', accountUrl: 'https://www.instagram.com/ministerioredes_', isActive: true },
     ],
   });
   console.log('✅ Social configs created');
@@ -197,18 +194,34 @@ async function main() {
       { key: 'address', value: '20 de Junio y Cotopaxi, Lago Agrio, Ecuador', label: 'Dirección', group: 'contact', type: 'text' },
       { key: 'city', value: 'Lago Agrio', label: 'Ciudad', group: 'contact', type: 'text' },
       { key: 'sector', value: 'Centro', label: 'Sector', group: 'contact', type: 'text' },
-      { key: 'phone', value: '099 453 8859', label: 'Teléfono', group: 'contact', type: 'text' },
-      { key: 'phone_international', value: '+593994538859', label: 'Teléfono (formato internacional)', group: 'contact', type: 'text' },
+      { key: 'phone', value: '0990498260', label: 'Teléfono', group: 'contact', type: 'text' },
+      { key: 'phone_international', value: '+593990498260', label: 'Teléfono (formato internacional)', group: 'contact', type: 'text' },
       { key: 'email', value: 'ministeriocristianoredes@gmail.com', label: 'Correo electrónico', group: 'contact', type: 'text' },
-      { key: 'whatsapp_number', value: '593994538859', label: 'WhatsApp (solo números)', group: 'contact', type: 'text' },
+      { key: 'whatsapp_number', value: '593990498260', label: 'WhatsApp (solo números)', group: 'contact', type: 'text' },
       { key: 'whatsapp_message', value: 'Hola! Quisiera información sobre el Ministerio REDES.', label: 'Mensaje predeterminado WhatsApp', group: 'contact', type: 'textarea' },
-      { key: 'mission', value: 'Ver una gran red de avivamiento en las familias de nuestro país. Con un gran deseo de evangelizar.', label: 'Misión', group: 'about', type: 'textarea' },
-      { key: 'vision', value: 'Ser una comunidad de fe que transforma vidas, fortalece familias y lleva esperanza a cada rincón de Lago Agrio y más allá.', label: 'Visión', group: 'about', type: 'textarea' },
-      { key: 'purpose', value: 'Llevar el evangelio de Jesucristo a cada familia, formando discípulos que transformen su entorno.', label: 'Propósito', group: 'about', type: 'textarea' },
-      { key: 'church_history', value: 'El Ministerio REDES nació con la visión de ser una gran red de avivamiento en las familias del Ecuador. Desde sus inicios en Lago Agrio, ha crecido como una comunidad de fe comprometida con la evangelización, la formación de discípulos y el servicio a la comunidad. A lo largo de los años, ha impactado miles de vidas a través de sus programas de jóvenes, adultos, familias y ministerios de adoración.', label: 'Reseña histórica', group: 'about', type: 'textarea' },
+      { key: 'mission', value: 'Formar, equipar y empoderar discípulos e influenciadores mediante un modelo de desarrollo integral (espiritual, emocional y físico), capacitándolos para liderar procesos de expansión del Reino de Dios y transformación social.', label: 'Misión', group: 'about', type: 'textarea' },
+      { key: 'mission_foundation', value: 'Fundamento Estratégico: Capacitación ministerial y perfeccionamiento de competencias (Efesios 4:12).', label: 'Fundamento de la Misión', group: 'about', type: 'textarea' },
+      { key: 'vision', value: 'Consolidar una red global de transformación familiar y comunitaria, impulsando un movimiento de avivamiento integral con impacto territorial y trascendencia generacional.', label: 'Visión', group: 'about', type: 'textarea' },
+      { key: 'vision_foundation', value: 'Fundamento Estratégico: Despliegue de red y pesca apostólica (Mateo 4:19).', label: 'Fundamento de la Visión', group: 'about', type: 'textarea' },
+      { key: 'purpose', value: 'Consolidarnos como un ministerio cristiano evangelístico global, rompiendo los esquemas de la fe tradicional pasiva para convertirnos en catalizadores de transformación comunitaria.', label: 'Propósito', group: 'about', type: 'textarea' },
+      { key: 'church_history', value: 'Hace aproximadamente siete años, nuestra organización nació con un propósito claro y retador: romper los esquemas de la fe tradicional pasiva y convertirnos en un catalizador de transformación comunitaria. Surgimos no para ser una estructura institucional de "puertas adentro", sino para consolidarnos como un ministerio cristiano evangelístico global, caracterizado por el concepto dinámico de una iglesia sin muros.', label: 'Reseña histórica', group: 'about', type: 'textarea' },
       { key: 'pastor_name', value: 'Marco Cárdenas', label: 'Nombre del pastor principal', group: 'pastor', type: 'text' },
       { key: 'pastor_photo_url', value: '', label: 'Foto del pastor', group: 'pastor', type: 'image' },
       { key: 'pastor_bio', value: 'El Pastor Marco Cárdenas ha sido un instrumento de Dios en el Ministerio REDES. Con años de servicio y dedicación a la obra, ha liderado la congregación con pasión por la evangelización y el discipulado. Su formación y experiencia en el ministerio pastoral han sido fundamentales para el crecimiento espiritual de la iglesia y el fortalecimiento de las familias en Lago Agrio y sus alrededores.', label: 'Biografía del pastor', group: 'pastor', type: 'textarea' },
+      { key: 'pillars_intro', value: 'Nuestra cultura organizacional se articula bajo tres dimensiones fundamentales:', label: 'Introducción a los pilares', group: 'about', type: 'textarea' },
+      { key: 'pillar_a_title', value: 'A. Relacional y Unidad Organizacional', label: 'Pilar A - Título', group: 'about', type: 'text' },
+      { key: 'pillar_a_body', value: 'Comunidad Interconectada (Trabajo en Equipo): Operamos bajo una arquitectura de red donde cada nodo es vital. Fomentamos el sentido de pertenencia y cohesión (Salmo 133:1).\nAfecto Colectivo y Empatía: La cultura relacional y el compañerismo representan el cimiento de nuestro clima organizacional.', label: 'Pilar A - Contenido', group: 'about', type: 'textarea' },
+      { key: 'pillar_b_title', value: 'B. Excelencia Operativa y Cultura de Alto Rendimiento', label: 'Pilar B - Título', group: 'about', type: 'text' },
+      { key: 'pillar_b_body', value: 'Cultura de Milla Doble (Proactividad e Innovación): Superamos los estándares básicos mediante un servicio de alto valor añadido (Mateo 5:41).\nExcelencia y Eficacia Operativa: Desarrollamos nuestros proyectos y procesos con rigor institucional, garantizando un impacto medible y sostenible (Colosenses 3:23).\nDisciplina Estratégica y Esfuerzo Continuo: Sostenemos el crecimiento a través de procesos formativos rigurosos y auto-gestión responsable.\nCarácter sobre Competencia (Fruto vs. Dones): Priorizamos la integridad personal y el desarrollo del carácter ético como requisito previo al despliegue de habilidades o capacidades (Gálatas 5:22-23).', label: 'Pilar B - Contenido', group: 'about', type: 'textarea' },
+      { key: 'pillar_c_title', value: 'C. Gobernanza y Sostenibilidad Espiritual', label: 'Pilar C - Título', group: 'about', type: 'text' },
+      { key: 'pillar_c_body', value: 'Dependencia Estratégica y Liderazgo Neumatológico: Basamos nuestras decisiones en la dirección y empoderamiento del Espíritu Santo (Hechos 1:8).\nAlineación Institucional y Principio de Autoridad: Mantenemos un orden jerárquico claro, fundamentado en la rendición de cuentas, la responsabilidad compartida y la cobertura institucional (Romanos 13:1).', label: 'Pilar C - Contenido', group: 'about', type: 'textarea' },
+      { key: 'objectives_intro', value: 'Para garantizar la efectividad de nuestra red, operamos bajo tres ejes estratégicos de desarrollo:', label: 'Introducción a los objetivos', group: 'about', type: 'textarea' },
+      { key: 'objective_1_title', value: 'Despliegue y Expansión Territorial', label: 'Objetivo 1 - Título', group: 'about', type: 'text' },
+      { key: 'objective_1_body', value: 'Escalabilidad de la red de discipulado mediante metodologías de evangelismo contextualizado en áreas urbanas y comunitarias.', label: 'Objetivo 1 - Contenido', group: 'about', type: 'textarea' },
+      { key: 'objective_2_title', value: 'Desarrollo Integral del Ser (Modelo 3D)', label: 'Objetivo 2 - Título', group: 'about', type: 'text' },
+      { key: 'objective_2_body', value: 'Formación holística en tres dimensiones: Física, Emocional y Espiritual (1 Tesalonicenses 5:23).', label: 'Objetivo 2 - Contenido', group: 'about', type: 'textarea' },
+      { key: 'objective_3_title', value: 'Sostenibilidad y Mayordomía Ambiental', label: 'Objetivo 3 - Título', group: 'about', type: 'text' },
+      { key: 'objective_3_body', value: 'Compromiso activo con la responsabilidad social y ambiental para el cuidado de la creación (Génesis 2:15).', label: 'Objetivo 3 - Contenido', group: 'about', type: 'textarea' },
       { key: 'copyright', value: 'Ministerio REDES. Todos los derechos reservados.', label: 'Texto de copyright', group: 'general', type: 'text' },
     ],
   });
