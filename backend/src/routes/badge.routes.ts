@@ -10,10 +10,10 @@ import {
 } from '../services/badge.service';
 import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 
-const router = Router();
+// Public router
+const publicRouter = Router();
 
-// Public routes
-router.get('/', async (req, res, next) => {
+publicRouter.get('/', async (req, res, next) => {
   try {
     const badges = await getPublicBadges();
     res.json(badges);
@@ -22,7 +22,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:slug', async (req, res, next) => {
+publicRouter.get('/:slug', async (req, res, next) => {
   try {
     const badge = await getBadgeBySlug(req.params.slug);
     res.json(badge);
@@ -31,8 +31,10 @@ router.get('/:slug', async (req, res, next) => {
   }
 });
 
-// Admin routes
-router.get('/all', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
+// Admin router
+const adminRouter = Router();
+
+adminRouter.get('/all', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
@@ -43,7 +45,7 @@ router.get('/all', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async 
   }
 });
 
-router.post('/', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
+adminRouter.post('/', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
   try {
     const badge = await createBadge(req.body);
     res.status(201).json(badge);
@@ -52,7 +54,7 @@ router.post('/', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (r
   }
 });
 
-router.put('/:id', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
+adminRouter.put('/:id', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
   try {
     const badge = await updateBadge(req.params.id, req.body);
     res.json(badge);
@@ -61,7 +63,7 @@ router.put('/:id', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async 
   }
 });
 
-router.delete('/:id', authenticate, authorize('ADMIN'), async (req: AuthRequest, res, next) => {
+adminRouter.delete('/:id', authenticate, authorize('ADMIN'), async (req: AuthRequest, res, next) => {
   try {
     await deleteBadge(req.params.id);
     res.status(204).send();
@@ -70,7 +72,7 @@ router.delete('/:id', authenticate, authorize('ADMIN'), async (req: AuthRequest,
   }
 });
 
-router.post('/:id/assign', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
+adminRouter.post('/:id/assign', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
   try {
     const { memberId, notes } = req.body;
     const assignment = await assignBadge(memberId, req.params.id, notes, req.user!.id);
@@ -80,4 +82,4 @@ router.post('/:id/assign', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER')
   }
 });
 
-export default router;
+export { publicRouter, adminRouter };

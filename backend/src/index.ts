@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import eventRoutes from './routes/event.routes';
 import blogRoutes from './routes/blog.routes';
-import badgeRoutes from './routes/badge.routes';
+import { publicRouter as badgePublicRoutes, adminRouter as badgeAdminRoutes } from './routes/badge.routes';
 import memberRoutes from './routes/member.routes';
 import mediaRoutes from './routes/media.routes';
 import socialRoutes from './routes/social.routes';
@@ -47,7 +47,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/posts', blogRoutes);
-app.use('/api/v1/badges', badgeRoutes);
+app.use('/api/v1/badges', badgePublicRoutes);
 app.use('/api/v1/members', memberRoutes);
 app.use('/api/v1/admin/media', mediaRoutes);
 app.use('/api/v1/social', socialRoutes);
@@ -56,7 +56,7 @@ app.use('/api/v1/site', siteRoutes);
 // Admin routes (protected)
 app.use('/api/v1/admin/events', eventRoutes);
 app.use('/api/v1/admin/posts', blogRoutes);
-app.use('/api/v1/admin/badges', badgeRoutes);
+app.use('/api/v1/admin/badges', badgeAdminRoutes);
 
 // Error handler
 app.use(errorHandler);
