@@ -1,15 +1,11 @@
 import { PrismaClient, UserRole, BadgeType, EventStatus, PostStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // Clean existing data
   await prisma.memberBadge.deleteMany();
   await prisma.postTag.deleteMany();
   await prisma.tag.deleteMany();
@@ -21,17 +17,19 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.media.deleteMany();
   await prisma.socialConfig.deleteMany();
+  await prisma.siteSetting.deleteMany();
+  await prisma.menuItem.deleteMany();
+  await prisma.pageContent.deleteMany();
+  await prisma.serviceSchedule.deleteMany();
 
-  // Create admin user
-  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  const hashedPassword = await bcrypt.hash('Excelencia079', 10);
   const admin = await prisma.user.create({
     data: {
-      username: process.env.ADMIN_USERNAME || 'admin',
-      email: process.env.ADMIN_EMAIL || 'admin@ministerioredes.org',
+      username: 'pasmarc079',
+      email: 'pasmarc079@ministerioredes.org',
       passwordHash: hashedPassword,
-      firstName: 'Administrador',
-      lastName: 'REDES',
+      firstName: 'Marco',
+      lastName: 'Cárdenas',
       roles: {
         create: [{ role: UserRole.ADMIN }],
       },
@@ -39,8 +37,21 @@ async function main() {
   });
   console.log('✅ Admin user created');
 
+  const editorPassword = await bcrypt.hash('editor123', 10);
+  const editor = await prisma.user.create({
+    data: {
+      username: 'editor',
+      email: 'editor@ministerioredes.com',
+      passwordHash: editorPassword,
+      firstName: 'Editor',
+      lastName: 'REDES',
+      roles: {
+        create: [{ role: UserRole.EDITOR }],
+      },
+    },
+  });
+  console.log('✅ Editor user created');
 
-  // Create badges
   const badges = await Promise.all([
     prisma.badge.create({
       data: {
@@ -85,9 +96,6 @@ async function main() {
   ]);
   console.log('✅ Badges created');
 
-
-
-  // Create events
   await prisma.event.create({
     data: {
       title: 'Exaltando al Padre 2026',
@@ -98,7 +106,7 @@ async function main() {
       endDate: new Date('2026-08-15T22:00:00'),
       location: 'Copotaxi',
       address: '20 de Junio y Cotopaxi, Lago Agrio, Ecuador',
-      flyerUrl: 'https://res.cloudinary.com/lswvtj4t/image/upload/v1785010693/redes/events/pozcbf1e1l71u7kvsqp6.png',
+      flyerUrl: 'https://res.cloudinary.com/dqz0z0z0z/image/upload/v1721952000/exaltando.png',
       status: EventStatus.UPCOMING,
       isFeatured: true,
       capacity: 500,
@@ -116,7 +124,7 @@ async function main() {
       endDate: new Date('2026-09-20T16:00:00'),
       location: 'Templo Principal',
       address: '20 de Junio y Cotopaxi, Lago Agrio, Ecuador',
-      flyerUrl: 'https://res.cloudinary.com/lswvtj4t/image/upload/v1785010698/redes/events/fau37zfkuc6zx8426xkj.png',
+      flyerUrl: 'https://res.cloudinary.com/dqz0z0z0z/image/upload/v1721952000/bautizos.png',
       status: EventStatus.UPCOMING,
       isFeatured: true,
       capacity: 300,
@@ -125,7 +133,6 @@ async function main() {
   });
   console.log('✅ Events created');
 
-  // Create tags
   const tags = await Promise.all([
     prisma.tag.create({ data: { name: 'Adoración', slug: 'adoracion', color: '#C9A84C' } }),
     prisma.tag.create({ data: { name: 'Familia', slug: 'familia', color: '#4A7C59' } }),
@@ -134,14 +141,13 @@ async function main() {
   ]);
   console.log('✅ Tags created');
 
-  // Create blog posts
   const post1 = await prisma.blogPost.create({
     data: {
       title: 'El poder de la adoración en comunidad',
       slug: 'el-poder-de-la-adoracion-en-comunidad',
       excerpt: 'Cuando nos reunimos para adorar juntos, algo sobrenatural sucede...',
       content: '<p>Cuando nos reunimos para adorar juntos, algo sobrenatural sucede. La presencia de Dios se manifiesta de una manera especial...</p>',
-      authorId: admin.id,
+      authorId: editor.id,
       status: PostStatus.PUBLISHED,
       publishedAt: new Date('2026-07-01'),
       readTime: 5,
@@ -156,14 +162,13 @@ async function main() {
       slug: 'bautismos-decision-que-marca',
       excerpt: 'El bautismo no es solo un acto simbólico, es una declaración pública de fe.',
       content: '<p>El bautismo no es solo un acto simbólico, es una declaración pública de fe...</p>',
-      authorId: admin.id,
+      authorId: editor.id,
       status: PostStatus.PUBLISHED,
       publishedAt: new Date('2026-04-12'),
       readTime: 7,
     },
   });
 
-  // Link tags to post
   await prisma.postTag.createMany({
     data: [
       { postId: post1.id, tagId: tags[0].id },
@@ -172,27 +177,117 @@ async function main() {
   });
   console.log('✅ Blog posts created');
 
-  // Social configs
   await prisma.socialConfig.createMany({
     data: [
-      {
-        platform: 'facebook',
-        accountUrl: 'https://www.facebook.com/MinisterioREDESlive',
-        isActive: true,
-      },
-      {
-        platform: 'youtube',
-        accountUrl: 'https://youtube.com/channel/UClpoz4Olk2soO3Cg2gUKWKA',
-        isActive: true,
-      },
-      {
-        platform: 'tiktok',
-        accountUrl: 'https://www.tiktok.com/@ministerioredes',
-        isActive: true,
-      },
+      { platform: 'facebook', accountUrl: 'https://www.facebook.com/MinisterioREDESlive', isActive: true },
+      { platform: 'youtube', accountUrl: 'https://youtube.com/channel/UClpoz4Olk2soO3Cg2gUKWKA', isActive: true },
+      { platform: 'tiktok', accountUrl: 'https://www.tiktok.com/@ministerioredes', isActive: true },
+      { platform: 'instagram', accountUrl: 'https://www.instagram.com/ministerioredes', isActive: true },
     ],
   });
   console.log('✅ Social configs created');
+
+  await prisma.siteSetting.createMany({
+    data: [
+      { key: 'site_name', value: 'Ministerio REDES', label: 'Nombre del sitio', group: 'general', type: 'text' },
+      { key: 'site_tagline', value: 'Una gran red de avivamiento en las familias de nuestro país', label: 'Eslogan', group: 'general', type: 'text' },
+      { key: 'site_description', value: 'Ver una gran red de avivamiento en las familias de nuestro país. Con un gran deseo de evangelizar.', label: 'Descripción corta', group: 'general', type: 'textarea' },
+      { key: 'logo_url', value: '/logo.svg', label: 'Logo principal', group: 'branding', type: 'image' },
+      { key: 'favicon_url', value: '/favicon.ico', label: 'Favicon', group: 'branding', type: 'image' },
+      { key: 'address', value: '20 de Junio y Cotopaxi, Lago Agrio, Ecuador', label: 'Dirección', group: 'contact', type: 'text' },
+      { key: 'city', value: 'Lago Agrio', label: 'Ciudad', group: 'contact', type: 'text' },
+      { key: 'sector', value: 'Centro', label: 'Sector', group: 'contact', type: 'text' },
+      { key: 'phone', value: '099 453 8859', label: 'Teléfono', group: 'contact', type: 'text' },
+      { key: 'phone_international', value: '+593994538859', label: 'Teléfono (formato internacional)', group: 'contact', type: 'text' },
+      { key: 'email', value: 'ministeriocristianoredes@gmail.com', label: 'Correo electrónico', group: 'contact', type: 'text' },
+      { key: 'whatsapp_number', value: '593994538859', label: 'WhatsApp (solo números)', group: 'contact', type: 'text' },
+      { key: 'whatsapp_message', value: 'Hola! Quisiera información sobre el Ministerio REDES.', label: 'Mensaje predeterminado WhatsApp', group: 'contact', type: 'textarea' },
+      { key: 'mission', value: 'Ver una gran red de avivamiento en las familias de nuestro país. Con un gran deseo de evangelizar.', label: 'Misión', group: 'about', type: 'textarea' },
+      { key: 'vision', value: 'Ser una comunidad de fe que transforma vidas, fortalece familias y lleva esperanza a cada rincón de Lago Agrio y más allá.', label: 'Visión', group: 'about', type: 'textarea' },
+      { key: 'purpose', value: 'Llevar el evangelio de Jesucristo a cada familia, formando discípulos que transformen su entorno.', label: 'Propósito', group: 'about', type: 'textarea' },
+      { key: 'church_history', value: 'El Ministerio REDES nació con la visión de ser una gran red de avivamiento en las familias del Ecuador. Desde sus inicios en Lago Agrio, ha crecido como una comunidad de fe comprometida con la evangelización, la formación de discípulos y el servicio a la comunidad. A lo largo de los años, ha impactado miles de vidas a través de sus programas de jóvenes, adultos, familias y ministerios de adoración.', label: 'Reseña histórica', group: 'about', type: 'textarea' },
+      { key: 'pastor_name', value: 'Marco Cárdenas', label: 'Nombre del pastor principal', group: 'pastor', type: 'text' },
+      { key: 'pastor_photo_url', value: '', label: 'Foto del pastor', group: 'pastor', type: 'image' },
+      { key: 'pastor_bio', value: 'El Pastor Marco Cárdenas ha sido un instrumento de Dios en el Ministerio REDES. Con años de servicio y dedicación a la obra, ha liderado la congregación con pasión por la evangelización y el discipulado. Su formación y experiencia en el ministerio pastoral han sido fundamentales para el crecimiento espiritual de la iglesia y el fortalecimiento de las familias en Lago Agrio y sus alrededores.', label: 'Biografía del pastor', group: 'pastor', type: 'textarea' },
+      { key: 'copyright', value: 'Ministerio REDES. Todos los derechos reservados.', label: 'Texto de copyright', group: 'general', type: 'text' },
+    ],
+  });
+  console.log('✅ Site settings created');
+
+  await prisma.menuItem.createMany({
+    data: [
+      { label: 'Inicio', url: '/', order: 1, location: 'header', isActive: true },
+      { label: 'Nosotros', url: '/nosotros', order: 2, location: 'header', isActive: true },
+      { label: 'Eventos', url: '/eventos', order: 3, location: 'header', isActive: true },
+      { label: 'Blog', url: '/blog', order: 4, location: 'header', isActive: true },
+      { label: 'Comunidad', url: '/comunidad', order: 5, location: 'header', isActive: true },
+      { label: 'Contacto', url: '/contacto', order: 6, location: 'header', isActive: true },
+      { label: 'Inicio', url: '/', order: 1, location: 'footer', isActive: true },
+      { label: 'Nosotros', url: '/nosotros', order: 2, location: 'footer', isActive: true },
+      { label: 'Eventos', url: '/eventos', order: 3, location: 'footer', isActive: true },
+      { label: 'Blog', url: '/blog', order: 4, location: 'footer', isActive: true },
+      { label: 'Comunidad', url: '/comunidad', order: 5, location: 'footer', isActive: true },
+      { label: 'Contacto', url: '/contacto', order: 6, location: 'footer', isActive: true },
+    ],
+  });
+  console.log('✅ Menu items created');
+
+  await prisma.pageContent.createMany({
+    data: [
+      {
+        key: 'hero_subtitle',
+        title: 'Subtítulo del Hero',
+        body: 'Ministerio Cristiano',
+        section: 'hero',
+        order: 1,
+      },
+      {
+        key: 'hero_title',
+        title: 'Título del Hero',
+        body: 'REDES',
+        section: 'hero',
+        order: 2,
+      },
+      {
+        key: 'hero_tagline',
+        title: 'Tagline del Hero',
+        body: 'Una gran red de avivamiento en las familias de nuestro país',
+        section: 'hero',
+        order: 3,
+      },
+      {
+        key: 'hero_location',
+        title: 'Ubicación del Hero',
+        body: 'Lago Agrio, Ecuador',
+        section: 'hero',
+        order: 4,
+      },
+      {
+        key: 'about_intro',
+        title: 'Introducción - Nosotros',
+        body: 'Somos una comunidad de fe comprometida con la transformación de vidas y familias a través del evangelio de Jesucristo.',
+        section: 'about',
+        order: 1,
+      },
+      {
+        key: 'pastor_section',
+        title: 'Nuestro Pastor',
+        body: 'El Pastor Marco Cárdenas ha dedicado su vida al servicio de Dios y a la edificación de su iglesia. Con una pasión ardiente por la evangelización y el discipulado, ha sido un pilar fundamental en el crecimiento del Ministerio REDES.',
+        section: 'about',
+        order: 2,
+      },
+    ],
+  });
+  console.log('✅ Page content created');
+
+  await prisma.serviceSchedule.createMany({
+    data: [
+      { name: 'Servicio Dominical', dayOfWeek: 'Domingo', time: '9:00 AM', description: 'Servicio principal de adoración y predicación', order: 1, isActive: true },
+      { name: 'Servicio de Viernes', dayOfWeek: 'Viernes', time: '7:00 PM', description: 'Noche de oración y estudio bíblico', order: 2, isActive: true },
+      { name: 'Jóvenes', dayOfWeek: 'Sábado', time: '6:00 PM', description: 'Reunión de jóvenes y adolescentes', order: 3, isActive: true },
+    ],
+  });
+  console.log('✅ Service schedules created');
 
   console.log('🎉 Database seeded successfully!');
 }

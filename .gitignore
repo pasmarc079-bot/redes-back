@@ -44,3 +44,12 @@ tests/blob-report/
 *.tsbuildinfo
 .cache/
 backend/cloudinary-test.ts
+
+# SSL certificates
+*.pem
+
+# Local folders
+lives/
+assets/
+drafts/
+.env.example

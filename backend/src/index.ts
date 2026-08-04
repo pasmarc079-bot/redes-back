@@ -15,6 +15,7 @@ import badgeRoutes from './routes/badge.routes';
 import memberRoutes from './routes/member.routes';
 import mediaRoutes from './routes/media.routes';
 import socialRoutes from './routes/social.routes';
+import siteRoutes from './routes/site.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -24,23 +25,7 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '8080', 10);
 
 // Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      baseUri: ["'self'"],
-      fontSrc: ["'self'", "https:", "data:"],
-      formAction: ["'self'"],
-      frameAncestors: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-      objectSrc: ["'none'"],
-      scriptSrc: ["'self'"],
-      scriptSrcAttr: ["'none'"],
-      styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-      upgradeInsecureRequests: [],
-    },
-  },
-}));
+app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
   credentials: true,
@@ -66,6 +51,7 @@ app.use('/api/v1/badges', badgeRoutes);
 app.use('/api/v1/members', memberRoutes);
 app.use('/api/v1/admin/media', mediaRoutes);
 app.use('/api/v1/social', socialRoutes);
+app.use('/api/v1/site', siteRoutes);
 
 // Admin routes (protected)
 app.use('/api/v1/admin/events', eventRoutes);
