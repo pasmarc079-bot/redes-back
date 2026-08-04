@@ -15,15 +15,6 @@ enum UserRole {
   VIEWER
 }
 
-enum BadgeType {
-  VOLUNTEER
-  LEADER
-  ATTENDANCE
-  SERVICE
-  SPECIAL
-  MILESTONE
-}
-
 enum EventStatus {
   DRAFT
   UPCOMING
@@ -51,9 +42,7 @@ model User {
   updatedAt    DateTime     @updatedAt @map("updated_at")
 
   roles        UserRoleEnum[]
-  member       Member?
   createdEvents Event[]     @relation("EventCreator")
-  createdBadges MemberBadge[] @relation("BadgeAssigner")
   authoredPosts BlogPost[]  @relation("PostAuthor")
   uploadedMedia  Media[]    @relation("MediaUploader")
 
@@ -68,57 +57,6 @@ model UserRoleEnum {
 
   @@unique([userId, role])
   @@map("user_roles")
-}
-
-model Member {
-  id          String        @id @default(uuid())
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String        @unique @map("user_id")
-  phone       String?       @db.VarChar(20)
-  bio         String?       @db.Text
-  joinDate    DateTime?     @map("join_date") @db.Date
-  groupName   String?       @map("group_name") @db.VarChar(100)
-  status      String?       @db.VarChar(20)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-
-  badges      MemberBadge[]
-
-  @@map("members")
-}
-
-model Badge {
-  id          String        @id @default(uuid())
-  name        String        @db.VarChar(100)
-  slug        String        @unique @db.VarChar(120)
-  description String?       @db.Text
-  iconUrl     String?       @map("icon_url")
-  type        BadgeType
-  color       String?       @db.VarChar(7)
-  criteria    String?       @db.Text
-  isActive    Boolean       @default(true) @map("is_active")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-
-  members     MemberBadge[]
-
-  @@map("badges")
-}
-
-model MemberBadge {
-  id          String    @id @default(uuid())
-  member      Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  memberId    String    @map("member_id")
-  badge       Badge     @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-  badgeId     String    @map("badge_id")
-  awardedDate DateTime  @default(now()) @map("awarded_date")
-  notes       String?   @db.Text
-  createdBy   User?     @relation("BadgeAssigner", fields: [createdById], references: [id], onDelete: SetNull)
-  createdById String?   @map("created_by")
-  createdAt   DateTime  @default(now()) @map("created_at")
-
-  @@unique([memberId, badgeId])
-  @@map("member_badges")
 }
 
 model Event {

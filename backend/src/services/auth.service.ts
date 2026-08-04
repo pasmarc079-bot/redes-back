@@ -83,7 +83,6 @@ export const getMe = async (userId: string) => {
       isActive: true,
       createdAt: true,
       roles: true,
-      member: true,
     },
   });
 

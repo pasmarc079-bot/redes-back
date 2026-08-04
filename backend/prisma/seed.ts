@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, BadgeType, EventStatus, PostStatus } from '@prisma/client';
+import { PrismaClient, UserRole, EventStatus, PostStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -6,13 +6,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  await prisma.memberBadge.deleteMany();
   await prisma.postTag.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.blogPost.deleteMany();
   await prisma.event.deleteMany();
-  await prisma.badge.deleteMany();
-  await prisma.member.deleteMany();
   await prisma.userRoleEnum.deleteMany();
   await prisma.user.deleteMany();
   await prisma.media.deleteMany();
@@ -51,45 +48,6 @@ async function main() {
     },
   });
   console.log('✅ Editor user created');
-
-  const badges = [];
-  for (const b of [
-    {
-      name: 'Voluntario del Evento',
-      slug: 'voluntario-del-evento',
-      description: 'Otorgado a quienes sirvieron como voluntarios en un evento',
-      type: BadgeType.VOLUNTEER,
-      color: '#C9A84C',
-      criteria: 'Participar como voluntario en al menos 1 evento',
-    },
-    {
-      name: 'Líder de Grupo',
-      slug: 'lider-de-grupo',
-      description: 'Otorgado a los líderes de grupos celulares',
-      type: BadgeType.LEADER,
-      color: '#B8860B',
-      criteria: 'Ser asignado como líder de un grupo celular',
-    },
-    {
-      name: 'Primer Bautismo',
-      slug: 'primer-bautismo',
-      description: 'Otorgado al momento del bautismo',
-      type: BadgeType.MILESTONE,
-      color: '#4A7C59',
-      criteria: 'Haber sido bautizado',
-    },
-    {
-      name: 'Coro de Adoración',
-      slug: 'coro-de-adoracion',
-      description: 'Miembro del equipo de adoración y alabanza',
-      type: BadgeType.SERVICE,
-      color: '#6B2FA0',
-      criteria: 'Ser parte del equipo de adoración',
-    },
-  ]) {
-    badges.push(await prisma.badge.create({ data: b }));
-  }
-  console.log('✅ Badges created');
 
   await prisma.event.create({
     data: {
