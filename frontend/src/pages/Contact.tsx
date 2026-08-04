@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiPhone, FiMail, FiSend } from 'react-icons/fi';
+import { useSiteStore } from '../stores/siteStore';
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
-  });
+  const { settings } = useSiteStore();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +30,6 @@ export default function Contact() {
       <section className="section-padding bg-cream">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Info */}
             <div>
               <h2 className="font-display text-3xl text-dark tracking-wider mb-6">
                 Conecta con nosotros
@@ -45,7 +42,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-dark mb-1">Dirección</h3>
-                    <p className="text-dark-light">20 de Junio y Cotopaxi, Lago Agrio, Ecuador</p>
+                    <p className="text-dark-light">{settings.address || ''}</p>
                   </div>
                 </div>
 
@@ -55,8 +52,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-dark mb-1">Teléfono</h3>
-                    <a href="tel:+593994538859" className="text-dark-light hover:text-gold">
-                      099 453 8859
+                    <a href={`tel:${settings.phone_international || ''}`} className="text-dark-light hover:text-gold">
+                      {settings.phone || ''}
                     </a>
                   </div>
                 </div>
@@ -67,23 +64,18 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-heading font-semibold text-dark mb-1">Email</h3>
-                    <a
-                      href="mailto:ministeriocristianoredes@gmail.com"
-                      className="text-dark-light hover:text-gold"
-                    >
-                      ministeriocristianoredes@gmail.com
+                    <a href={`mailto:${settings.email || ''}`} className="text-dark-light hover:text-gold">
+                      {settings.email || ''}
                     </a>
                   </div>
                 </div>
               </div>
 
-              {/* Map placeholder */}
               <div className="h-64 bg-dark-light rounded-xl flex items-center justify-center">
                 <p className="text-silver">Mapa interactivo</p>
               </div>
             </div>
 
-            {/* Contact Form */}
             <div>
               <div className="card p-6 md:p-8">
                 {submitted ? (
@@ -99,65 +91,36 @@ export default function Contact() {
                     <p className="text-dark-light">
                       Gracias por contactarnos. Te responderemos pronto.
                     </p>
-                    <button
-                      onClick={() => setSubmitted(false)}
-                      className="btn btn-primary mt-6"
-                    >
+                    <button onClick={() => setSubmitted(false)} className="btn btn-primary mt-6">
                       Enviar otro mensaje
                     </button>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <h2 className="font-heading text-xl text-dark mb-4">Envíanos un mensaje</h2>
-
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-dark mb-1">
-                        Nombre
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        required
-                        value={formData.name}
+                      <label htmlFor="name" className="block text-sm font-medium text-dark mb-1">Nombre</label>
+                      <input id="name" type="text" required value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg border border-dark/20 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all"
-                        placeholder="Tu nombre"
-                      />
+                        placeholder="Tu nombre" />
                     </div>
-
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-dark mb-1">
-                        Email
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        value={formData.email}
+                      <label htmlFor="email" className="block text-sm font-medium text-dark mb-1">Email</label>
+                      <input id="email" type="email" required value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg border border-dark/20 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all"
-                        placeholder="tu@email.com"
-                      />
+                        placeholder="tu@email.com" />
                     </div>
-
                     <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-dark mb-1">
-                        Mensaje
-                      </label>
-                      <textarea
-                        id="message"
-                        required
-                        rows={5}
-                        value={formData.message}
+                      <label htmlFor="message" className="block text-sm font-medium text-dark mb-1">Mensaje</label>
+                      <textarea id="message" required rows={5} value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg border border-dark/20 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none transition-all resize-none"
-                        placeholder="¿En qué podemos ayudarte?"
-                      />
+                        placeholder="¿En qué podemos ayudarte?" />
                     </div>
-
                     <button type="submit" className="btn btn-primary w-full justify-center">
-                      Enviar mensaje
-                      <FiSend />
+                      Enviar mensaje <FiSend />
                     </button>
                   </form>
                 )}

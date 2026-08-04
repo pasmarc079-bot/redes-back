@@ -15,6 +15,7 @@ import badgeRoutes from './routes/badge.routes';
 import memberRoutes from './routes/member.routes';
 import mediaRoutes from './routes/media.routes';
 import socialRoutes from './routes/social.routes';
+import siteRoutes from './routes/site.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -50,6 +51,7 @@ app.use('/api/v1/badges', badgeRoutes);
 app.use('/api/v1/members', memberRoutes);
 app.use('/api/v1/admin/media', mediaRoutes);
 app.use('/api/v1/social', socialRoutes);
+app.use('/api/v1/site', siteRoutes);
 
 // Admin routes (protected)
 app.use('/api/v1/admin/events', eventRoutes);

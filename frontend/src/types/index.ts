@@ -74,6 +74,43 @@ export interface SocialConfig {
   platform: string;
   accountUrl: string | null;
   feedUrl: string | null;
+  isActive: boolean;
+}
+
+export interface SiteSettings {
+  [key: string]: string;
+}
+
+export interface MenuItem {
+  id: string;
+  label: string;
+  url: string;
+  order: number;
+  isActive: boolean;
+  parentId: string | null;
+  location: string;
+  children?: MenuItem[];
+}
+
+export interface PageContent {
+  id: string;
+  key: string;
+  title: string | null;
+  body: string | null;
+  section: string;
+  order: number;
+  imageUrl: string | null;
+  isActive: boolean;
+}
+
+export interface ServiceSchedule {
+  id: string;
+  name: string;
+  dayOfWeek: string;
+  time: string;
+  description: string | null;
+  order: number;
+  isActive: boolean;
 }
 
 export interface Pagination {

@@ -33,4 +33,11 @@ export const socialApi = {
   getConfigs: () => api.get('/social/configs'),
 };
 
+export const siteApi = {
+  getSettings: () => api.get('/site/settings'),
+  getMenu: (location: string) => api.get(`/site/menu/${location}`),
+  getContent: (section?: string) => api.get('/site/content', { params: section ? { section } : {} }),
+  getServices: () => api.get('/site/services'),
+};
+
 export default api;

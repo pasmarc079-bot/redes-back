@@ -9,6 +9,7 @@ import PostList from '@/pages/blog/PostList';
 import PostEditor from '@/pages/blog/PostEditor';
 import BadgeList from '@/pages/badges/BadgeList';
 import BadgeForm from '@/pages/badges/BadgeForm';
+import Settings from '@/pages/settings/Settings';
 
 function StubPage({ title }: { title: string }) {
   return (
@@ -52,7 +53,7 @@ export default function App() {
         {/* Stubs */}
         <Route path="members" element={<StubPage title="Gestión de Miembros" />} />
         <Route path="media" element={<StubPage title="Biblioteca de Media" />} />
-        <Route path="settings" element={<StubPage title="Configuración" />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

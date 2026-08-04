@@ -2,40 +2,34 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX } from 'react-icons/fi';
-
-const navLinks = [
-  { label: 'Inicio', path: '/' },
-  { label: 'Nosotros', path: '/nosotros' },
-  { label: 'Eventos', path: '/eventos' },
-  { label: 'Blog', path: '/blog' },
-  { label: 'Comunidad', path: '/comunidad' },
-  { label: 'Contacto', path: '/contacto' },
-];
+import { useSiteStore } from '../../stores/siteStore';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { headerMenu, settings } = useSiteStore();
+
+  const siteName = settings.site_name || 'REDES';
+  const logoUrl = settings.logo_url || '/logo.svg';
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-dark/95 backdrop-blur-sm border-b border-gold/20">
       <div className="container-custom">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
-            <img src="/logo.svg" alt="Ministerio REDES" className="h-9 w-9 md:h-11 md:w-11" />
+            <img src={logoUrl} alt={siteName} className="h-9 w-9 md:h-11 md:w-11" />
             <span className="font-display text-3xl md:text-4xl text-gold tracking-wider">
-              REDES
+              {siteName}
             </span>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {headerMenu.map((link) => (
               <Link
-                key={link.path}
-                to={link.path}
+                key={link.id}
+                to={link.url}
                 className={`font-heading text-sm font-medium tracking-wide uppercase transition-colors ${
-                  location.pathname === link.path
+                  location.pathname === link.url
                     ? 'text-gold'
                     : 'text-cream hover:text-gold-light'
                 }`}
@@ -48,7 +42,6 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden text-cream p-2"
@@ -59,7 +52,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -69,13 +61,13 @@ export default function Navbar() {
             className="md:hidden bg-dark border-t border-gold/20"
           >
             <div className="container-custom py-4 flex flex-col gap-2">
-              {navLinks.map((link) => (
+              {headerMenu.map((link) => (
                 <Link
-                  key={link.path}
-                  to={link.path}
+                  key={link.id}
+                  to={link.url}
                   onClick={() => setIsOpen(false)}
                   className={`font-heading text-base font-medium py-3 px-4 rounded-lg transition-colors ${
-                    location.pathname === link.path
+                    location.pathname === link.url
                       ? 'text-gold bg-gold/10'
                       : 'text-cream hover:text-gold-light hover:bg-dark-lighter'
                   }`}
