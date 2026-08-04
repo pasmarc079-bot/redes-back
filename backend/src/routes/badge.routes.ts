@@ -32,7 +32,7 @@ router.get('/:slug', async (req, res, next) => {
 });
 
 // Admin routes
-router.get('/admin/all', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
+router.get('/all', authenticate, authorize('ADMIN', 'COMMUNITY_MANAGER'), async (req: AuthRequest, res, next) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
