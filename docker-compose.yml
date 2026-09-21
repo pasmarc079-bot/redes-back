@@ -31,7 +31,7 @@ services:
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
       JWT_EXPIRATION: 86400000
-      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+      CORS_ORIGINS: http://localhost:3000
     ports:
       - "8080:8080"
     depends_on:
@@ -45,16 +45,6 @@ services:
     container_name: redes-frontend
     ports:
       - "3000:8080"
-    depends_on:
-      - backend
-
-  admin:
-    build:
-      context: ./admin
-      dockerfile: Dockerfile
-    container_name: redes-admin
-    ports:
-      - "3001:8080"
     depends_on:
       - backend
 
