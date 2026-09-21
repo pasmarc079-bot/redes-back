@@ -6,6 +6,8 @@ import {
   createPost,
   updatePost,
   deletePost,
+  publishPost,
+  unpublishPost,
   getAllPosts,
   getTags,
 } from '../services/blog.service';
@@ -29,6 +31,22 @@ router.get('/detail/:id', authenticate, authorize('ADMIN', 'EDITOR'), async (req
   try {
     const post = await getPostById(req.params.id);
     res.json(post);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/:id/publish', authenticate, authorize('ADMIN', 'EDITOR'), async (req: AuthRequest, res, next) => {
+  try {
+    res.json(await publishPost(req.params.id));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/:id/unpublish', authenticate, authorize('ADMIN', 'EDITOR'), async (req: AuthRequest, res, next) => {
+  try {
+    res.json(await unpublishPost(req.params.id));
   } catch (error) {
     next(error);
   }

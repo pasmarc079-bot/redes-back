@@ -26,6 +26,35 @@ router.put('/settings', authenticate, authorize('ADMIN'), async (req, res) => {
   res.json({ success: true });
 });
 
+const menuUpdateFields = ['label', 'order', 'isActive', 'location'] as const;
+const contentUpdateFields = ['title', 'body', 'imageUrl', 'isActive', 'order', 'section'] as const;
+
+const pickFields = <T extends Record<string, unknown>>(source: T, fields: readonly string[]) =>
+  Object.fromEntries(fields.filter(field => source[field] !== undefined).map(field => [field, source[field]]));
+
+router.put('/pages/:pageKey', authenticate, authorize('ADMIN'), async (req, res) => {
+  const { settings = {}, content = [] } = req.body as {
+    settings?: Record<string, string>;
+    content?: Array<{ key: string } & Record<string, unknown>>;
+  };
+
+  if (!settings || typeof settings !== 'object' || !Array.isArray(content)) {
+    return res.status(400).json({ error: 'Invalid page configuration payload' });
+  }
+
+  await prisma.$transaction([
+    ...Object.entries(settings).map(([key, value]) =>
+      prisma.siteSetting.update({ where: { key }, data: { value } })
+    ),
+    ...content.map(item => prisma.pageContent.update({
+      where: { key: item.key },
+      data: pickFields(item, contentUpdateFields),
+    })),
+  ]);
+
+  res.json({ success: true });
+});
+
 router.get('/menu/:location', async (req, res) => {
   const { location } = req.params;
   const items = await prisma.menuItem.findMany({
@@ -42,6 +71,20 @@ router.get('/menu', authenticate, authorize('ADMIN'), async (_req, res) => {
     include: { children: { orderBy: { order: 'asc' } } },
   });
   res.json(items);
+});
+
+router.put('/menu/batch', authenticate, authorize('ADMIN'), async (req, res) => {
+  const items = req.body?.items;
+  if (!Array.isArray(items)) return res.status(400).json({ error: 'items must be an array' });
+
+  await prisma.$transaction(items.map((item: { id: string } & Record<string, unknown>) =>
+    prisma.menuItem.update({
+      where: { id: item.id },
+      data: pickFields(item, menuUpdateFields),
+    })
+  ));
+
+  res.json({ success: true });
 });
 
 router.post('/menu', authenticate, authorize('ADMIN'), async (req, res) => {
@@ -69,6 +112,20 @@ router.get('/content', async (req, res) => {
 router.get('/content/admin', authenticate, authorize('ADMIN'), async (_req, res) => {
   const items = await prisma.pageContent.findMany({ orderBy: [{ section: 'asc' }, { order: 'asc' }] });
   res.json(items);
+});
+
+router.put('/content/batch', authenticate, authorize('ADMIN'), async (req, res) => {
+  const items = req.body?.items;
+  if (!Array.isArray(items)) return res.status(400).json({ error: 'items must be an array' });
+
+  await prisma.$transaction(items.map((item: { id: string } & Record<string, unknown>) =>
+    prisma.pageContent.update({
+      where: { id: item.id },
+      data: pickFields(item, contentUpdateFields),
+    })
+  ));
+
+  res.json({ success: true });
 });
 
 router.post('/content', authenticate, authorize('ADMIN'), async (req, res) => {

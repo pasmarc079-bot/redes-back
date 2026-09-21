@@ -40,7 +40,8 @@ router.get('/', async (req, res, next) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
     const featured = req.query.featured === 'true';
-    const result = await getPublicEvents(page, limit, featured);
+    const includeCompleted = req.query.includeCompleted === 'true';
+    const result = await getPublicEvents(page, limit, featured, includeCompleted);
     res.json(result);
   } catch (error) {
     next(error);

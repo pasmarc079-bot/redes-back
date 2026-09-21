@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { FiArrowLeft, FiCalendar, FiMapPin, FiExternalLink } from 'react-icons/fi';
 import { eventsApi } from '@/services/api';
 import type { Event } from '@/types';
+import EventImage from '@/components/events/EventImage';
+import Seo from '@/components/Seo';
 
 export default function EventDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -42,6 +44,7 @@ export default function EventDetail() {
 
   return (
     <div>
+      <Seo title={`${event.title} | Ministerio REDES`} description={event.shortDescription || event.description || `Conoce ${event.title}.`} image={event.flyerUrl || '/assets/events/exaltando.png'} />
       {/* Hero */}
       <section className="relative bg-dark py-20 md:py-28">
         <div className="container-custom">
@@ -90,9 +93,8 @@ export default function EventDetail() {
           {/* Flyer */}
           {event.flyerUrl && (
             <div className="mb-8">
-              <img
-                src={event.flyerUrl}
-                alt={event.title}
+              <EventImage
+                event={event}
                 className="w-full aspect-video object-cover rounded-xl shadow-lg"
               />
             </div>

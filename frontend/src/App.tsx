@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
@@ -10,9 +11,22 @@ import Community from './pages/Community';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 
+const AdminApp = lazy(() => import('./admin/App'));
+
 function App() {
   return (
     <Routes>
+      {/* Admin Routes - fuera del Layout público */}
+      <Route
+        path="/admin/*"
+        element={
+          <Suspense fallback={<div className="min-h-screen bg-cream flex items-center justify-center">Cargando panel...</div>}>
+            <AdminApp />
+          </Suspense>
+        }
+      />
+
+      {/* Public Routes */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="nosotros" element={<About />} />

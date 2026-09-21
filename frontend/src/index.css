@@ -52,6 +52,105 @@
   .card-dark {
     @apply bg-dark rounded-xl shadow-lg overflow-hidden;
   }
+
+  /* Recolor the monochrome brand mark when it sits on the dark navbar. */
+  .logo-on-dark {
+    filter: brightness(0) saturate(100%) invert(70%) sepia(38%) saturate(780%) hue-rotate(5deg) brightness(89%) contrast(88%);
+  }
+
+  /* Admin form primitives are scoped to avoid changing the public site. */
+  .admin-shell .input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    color: #111827;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .admin-shell .input:hover {
+    border-color: #9ca3af;
+  }
+
+  .admin-shell .input:focus {
+    border-color: #c9a84c;
+    box-shadow: 0 0 0 2px rgb(201 168 76 / 15%);
+  }
+
+  .admin-shell .textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    color: #111827;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+    min-height: 100px;
+    resize: none;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .admin-shell .textarea:hover {
+    border-color: #9ca3af;
+  }
+
+  .admin-shell .textarea:focus {
+    border-color: #c9a84c;
+    box-shadow: 0 0 0 2px rgb(201 168 76 / 15%);
+  }
+
+  .admin-shell .label {
+    display: block;
+    margin-bottom: 0.375rem;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .admin-shell .card-body {
+    padding: 1.5rem;
+  }
+
+  .admin-shell .field-group {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f9fafb;
+  }
+
+  .admin-shell .tab {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  .admin-shell .tab-active {
+    background-color: #1a1a1a;
+    color: #c9a84c;
+  }
+
+  .admin-shell .tab-inactive {
+    background-color: #f3f4f6;
+    color: #4b5563;
+  }
+
+  .admin-shell .tab-inactive:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+  }
 }
 
 @layer utilities {

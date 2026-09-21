@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import { useSiteStore } from '../../stores/siteStore';
+import ResponsiveCover from '@/components/layout/ResponsiveCover';
 
 export default function HeroSection() {
   const { content, settings } = useSiteStore();
@@ -9,9 +10,11 @@ export default function HeroSection() {
   const get = (key: string) => heroItems.find(i => i.key === key)?.body || '';
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-dark overflow-hidden">
+    <section data-nav-theme="dark" className="relative min-h-screen flex items-center justify-center bg-dark overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-dark/70 via-dark/50 to-dark/80 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-br from-dark via-dark-light to-gold/20 z-0" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-dark via-dark-light to-gold/20">
+        <ResponsiveCover desktopImage={settings.hero_image_url} mobileImage={settings.hero_image_mobile_url} alt="" />
+      </div>
 
       <div className="relative z-20 container-custom text-center">
         <motion.div
@@ -20,7 +23,11 @@ export default function HeroSection() {
           transition={{ duration: 0.8 }}
         >
           <div className="mb-6 flex justify-center">
-            <img src={settings.logo_url || '/logo.svg'} alt={settings.site_name || 'REDES'} className="h-20 w-20 md:h-28 md:w-28 lg:h-32 lg:w-32" />
+             <img
+               src={settings.logo_url || '/logo.svg'}
+               alt={settings.site_name || 'REDES'}
+               className="h-20 w-20 md:h-28 md:w-28 lg:h-32 lg:w-32 logo-on-dark"
+             />
           </div>
 
           <p className="font-heading text-gold uppercase tracking-[0.3em] text-sm md:text-base mb-4">

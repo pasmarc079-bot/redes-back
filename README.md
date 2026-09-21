@@ -6,13 +6,11 @@ Sitio web oficial del Ministerio Cristiano REDES de Lago Agrio, Ecuador.
 
 | Capa | Tecnología |
 |------|-----------|
-| **Frontend Público** | React + Vite + Tailwind CSS + Framer Motion |
-| **Admin Panel** | React + Vite + Tailwind + TipTap (Rich Text) |
+| **Frontend + Admin** | React + Vite + Tailwind CSS + Framer Motion + TipTap/BlockNote |
 | **Backend API** | Node.js + Express + TypeScript + Prisma |
 | **Base de Datos** | PostgreSQL 16 |
 | **Imágenes** | Cloudinary (CDN global, optimización automática) |
 | **Auth** | JWT + bcrypt |
-| **Tests E2E** | Playwright |
 
 ## Identidad Visual
 
@@ -22,10 +20,9 @@ Sitio web oficial del Ministerio Cristiano REDES de Lago Agrio, Ecuador.
 
 ## Redes Sociales
 
-- **Facebook:** [@MinisterioREDESlive](https://www.facebook.com/MinisterioREDESlive) (3.9K seguidores)
-- **YouTube:** [Canal oficial](https://youtube.com/channel/UClpoz4Olk2soO3Cg2gUKWKA)
-- **TikTok:** Activo con transmisiones en vivo
-- **WhatsApp:** 099 453 8859
+Gestionadas dinámicamente vía el panel de administración (Settings > Redes Sociales).
+
+- Facebook, YouTube, TikTok, Instagram, WhatsApp
 
 ## Desarrollo Local
 
@@ -45,23 +42,15 @@ npx prisma db seed
 npm run dev
 ```
 
-### 3. Frontend
+### 3. Frontend (incluye Admin)
 
 ```bash
 cd frontend
 npm install
 npm run dev
 # http://localhost:5173
-```
-
-### 4. Admin
-
-```bash
-cd admin
-npm install
-npm run dev
-# http://localhost:5174
-# Login: admin / admin123
+# Admin: http://localhost:5173/admin/login
+# Login: pasmarc079 / Excelencia079
 ```
 
 ## Despliegue en Seenode
@@ -72,7 +61,6 @@ Cada servicio se despliega de forma independiente como **Web Service** en Seenod
 |----------|----------|---------------|---------------|------|
 | **Backend** | `backend` | `npm install && npx prisma generate && npm run build` | `npx prisma migrate deploy && npm start` | 8080 |
 | **Frontend** | `frontend` | `npm install && npm run build` | `node server.cjs` | 8080 |
-| **Admin** | `admin` | `npm install && npm run build` | `node server.cjs` | 8080 |
 
 ### Base de datos
 
@@ -86,17 +74,14 @@ Ver [docs/deployment-seenode.md](docs/deployment-seenode.md) para instrucciones 
 
 | Rol | Usuario | Contraseña |
 |-----|---------|-----------|
-| Admin | admin | admin123 |
+| Admin | pasmarc079 | Excelencia079 |
 | Editor | editor | editor123 |
 
 ## Estructura del Proyecto
 
 ```
-├── frontend/          # SPA pública (React + Vite + Express server)
-├── admin/             # Panel de administración (React + Vite + Express server)
+├── frontend/          # SPA pública + Admin panel (React + Vite + Express server)
 ├── backend/           # API REST (Node.js + Express + Prisma)
-├── tests/             # Playwright E2E
-├── docs/              # Documentación
 ├── docker-compose.yml # Desarrollo local
 └── render.yaml        # Config alternativa para Render
 ```
@@ -108,18 +93,26 @@ Ver [docs/deployment-seenode.md](docs/deployment-seenode.md) para instrucciones 
 - `GET /api/v1/events/:slug` — Detalle de evento
 - `GET /api/v1/posts` — Lista de artículos
 - `GET /api/v1/posts/:slug` — Artículo completo
-- `GET /api/v1/badges` — Lista de insignias
-- `GET /api/v1/members` — Lista de miembros
 - `GET /api/v1/social/configs` — Config de redes sociales
+- `GET /api/v1/site/settings` — Configuración del sitio
+- `GET /api/v1/site/menu/:location` — Menús (header/footer)
+- `GET /api/v1/site/content` — Contenido por sección
+- `GET /api/v1/site/services` — Horarios de servicios
 
 ### Admin (requiere auth)
 - `POST /api/v1/auth/login` — Login
 - `GET /api/v1/auth/me` — Perfil actual
 - `CRUD /api/v1/admin/events` — Gestión de eventos
 - `CRUD /api/v1/admin/posts` — Gestión de artículos
-- `CRUD /api/v1/admin/badges` — Gestión de insignias
-- `POST /api/v1/admin/badges/:id/assign` — Asignar insignia
 - `CRUD /api/v1/admin/media` — Biblioteca de imágenes (Cloudinary)
+- `CRUD /api/v1/social/admin/configs` — Gestión de redes sociales
+- `PUT /api/v1/social/admin/configs` — Guarda redes sociales activas, orden y visibilidad en lote
+- `CRUD /api/v1/site/settings` — Gestión de configuración
+- `CRUD /api/v1/site/menu` — Gestión de menús
+- `PUT /api/v1/site/menu/batch` — Guarda en una transacción el orden y visibilidad del menú superior
+- `CRUD /api/v1/site/content` — Gestión de contenido
+- `PUT /api/v1/site/pages/:pageKey` — Guarda en una transacción el contenido de una página
+- `CRUD /api/v1/site/services` — Gestión de servicios
 
 ## Integración Social
 

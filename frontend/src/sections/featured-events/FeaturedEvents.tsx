@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FiCalendar, FiMapPin, FiArrowRight } from 'react-icons/fi';
 import { eventsApi } from '@/services/api';
 import type { Event } from '@/types';
+import EventImage from '@/components/events/EventImage';
 
 export default function FeaturedEvents() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -24,10 +25,10 @@ export default function FeaturedEvents() {
   if (events.length === 0) return null;
 
   return (
-    <section className="section-padding bg-cream">
+    <section data-nav-theme="light" className="section-padding bg-cream">
       <div className="container-custom">
         <div className="text-center mb-12">
-          <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-2">
+          <p className="font-heading text-gold-ink uppercase tracking-[0.2em] text-sm mb-2">
             No te lo pierdas
           </p>
           <h2 className="font-display text-4xl md:text-5xl text-dark tracking-wider">
@@ -39,7 +40,7 @@ export default function FeaturedEvents() {
           {events.map((event, index) => (
             <motion.div
               key={event.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
@@ -47,17 +48,10 @@ export default function FeaturedEvents() {
               <Link to={`/eventos/${event.slug}`} className="card group block h-full">
                 {/* Image */}
                 <div className="relative h-48 bg-dark-light overflow-hidden">
-                  {event.flyerUrl ? (
-                    <img
-                      src={event.flyerUrl}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark to-gold/20">
-                      <FiCalendar className="text-gold text-4xl" />
-                    </div>
-                  )}
+                  <EventImage
+                    event={event}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                   {event.isFeatured && (
                     <span className="absolute top-3 right-3 bg-gold text-dark text-xs font-heading font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                       Destacado

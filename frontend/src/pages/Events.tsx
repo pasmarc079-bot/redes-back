@@ -4,14 +4,33 @@ import { motion } from 'framer-motion';
 import { FiCalendar, FiMapPin } from 'react-icons/fi';
 import { eventsApi } from '@/services/api';
 import type { Event } from '@/types';
+import EventImage from '@/components/events/EventImage';
+import Seo from '@/components/Seo';
+import { useSiteStore } from '@/stores/siteStore';
+import ResponsiveCover from '@/components/layout/ResponsiveCover';
+
+const statusLabels: Record<string, string> = {
+  UPCOMING: 'Próximo',
+  ONGOING: 'En curso',
+  COMPLETED: 'Finalizado',
+};
+
+const statusStyles: Record<string, string> = {
+  UPCOMING: 'bg-blue-600 text-white',
+  ONGOING: 'bg-green-600 text-white',
+  COMPLETED: 'bg-gray-700 text-white',
+};
 
 export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const pageSettings = useSiteStore((state) => state.settings);
+  const eventsContent = useSiteStore((state) => state.content.events || []);
+  const getText = (key: string, fallback: string) => eventsContent.find(item => item.key === key)?.body || fallback;
 
   useEffect(() => {
     eventsApi
-      .getAll(1, 20)
+      .getAll(1, 20, false, true)
       .then((res) => setEvents(res.data.events))
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
@@ -19,13 +38,16 @@ export default function Events() {
 
   return (
     <div>
-      <section className="relative bg-dark py-20 md:py-28">
-        <div className="container-custom text-center">
+      <Seo title="Eventos | Ministerio REDES" description="Conoce los próximos eventos y actividades del Ministerio REDES en Lago Agrio." />
+      <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
+        <ResponsiveCover desktopImage={pageSettings.events_cover_image_url} mobileImage={pageSettings.events_cover_image_mobile_url} alt="" />
+        {(pageSettings.events_cover_image_url || pageSettings.events_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
-            Únete a nosotros
+            {getText('events_page_description', 'Únete a nosotros')}
           </p>
           <h1 className="font-display text-5xl md:text-7xl text-gold tracking-wider">
-            Eventos
+            {getText('events_page_title', 'Eventos')}
           </h1>
         </div>
       </section>
@@ -49,34 +71,30 @@ export default function Events() {
               {events.map((event, index) => (
                 <motion.div
                   key={event.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={false}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                 >
                   <Link to={`/eventos/${event.slug}`} className="card group block h-full">
                     <div className="relative h-48 bg-dark-light overflow-hidden">
-                      {event.flyerUrl ? (
-                        <img
-                          src={event.flyerUrl}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-dark to-gold/20">
-                          <FiCalendar className="text-gold text-4xl" />
-                        </div>
-                      )}
+                      <EventImage
+                        event={event}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                       {event.isFeatured && (
                         <span className="absolute top-3 right-3 bg-gold text-dark text-xs font-heading font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                           Destacado
                         </span>
                       )}
+                      <span className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-heading font-bold uppercase tracking-wider ${statusStyles[event.status] || 'bg-gray-700 text-white'}`}>
+                        {statusLabels[event.status] || event.status}
+                      </span>
                     </div>
                     <div className="p-5">
-                      <h3 className="font-heading text-lg font-bold text-dark mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
-                        {event.title}
-                      </h3>
+                        <h2 className="font-heading text-lg font-bold text-dark mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
+                          {event.title}
+                        </h2>
                       <div className="space-y-2 text-sm text-dark-light">
                         {event.startDate && (
                           <div className="flex items-center gap-2">

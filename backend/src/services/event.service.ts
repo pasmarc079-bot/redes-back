@@ -23,38 +23,69 @@ export interface CreateEventInput {
 
 export interface UpdateEventInput extends Partial<CreateEventInput> {}
 
-export const getPublicEvents = async (page = 1, limit = 12, featured = false) => {
-  const skip = (page - 1) * limit;
+const ecuadorDateKey = (date: Date) => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Guayaquil',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
 
-  const where: any = {
-    status: { in: [EventStatus.UPCOMING, EventStatus.ONGOING] },
-  };
+export const getAutomaticEventStatus = (event: { startDate: Date; endDate?: Date | null; status?: EventStatus }, now = new Date()): EventStatus => {
+  if (event.status === EventStatus.CANCELLED) return EventStatus.CANCELLED;
 
-  if (featured) {
-    where.isFeatured = true;
+  const today = ecuadorDateKey(now);
+  const startDay = ecuadorDateKey(event.startDate);
+  const endDay = event.endDate ? ecuadorDateKey(event.endDate) : startDay;
+
+  // The event remains "ongoing" throughout its calendar day in Ecuador.
+  if (today === startDay || today === endDay) return EventStatus.ONGOING;
+
+  if (event.endDate) {
+    if (now > event.endDate) return EventStatus.COMPLETED;
+    return now < event.startDate ? EventStatus.UPCOMING : EventStatus.ONGOING;
   }
 
-  const [events, total] = await Promise.all([
+  return now < event.startDate ? EventStatus.UPCOMING : EventStatus.COMPLETED;
+};
+
+const withAutomaticStatus = <T extends { startDate: Date; endDate?: Date | null; status: EventStatus }>(event: T) => ({
+  ...event,
+  status: getAutomaticEventStatus(event),
+});
+
+export const getPublicEvents = async (page = 1, limit = 12, featured = false, includeCompleted = false) => {
+  const skip = (page - 1) * limit;
+
+  const where: any = { status: { notIn: [EventStatus.DRAFT, EventStatus.CANCELLED] } };
+  if (featured) where.isFeatured = true;
+
+  const [storedEvents] = await Promise.all([
     prisma.event.findMany({
       where,
       orderBy: { startDate: 'asc' },
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        shortDescription: true,
-        startDate: true,
-        endDate: true,
-        location: true,
-        flyerUrl: true,
-        isFeatured: true,
-        status: true,
-      },
     }),
-    prisma.event.count({ where }),
   ]);
+
+  const events = storedEvents
+    .map(withAutomaticStatus)
+    .filter(event => event.status === EventStatus.UPCOMING || event.status === EventStatus.ONGOING || (includeCompleted && event.status === EventStatus.COMPLETED))
+    .sort((a, b) => {
+      const rank = { ONGOING: 0, UPCOMING: 1, COMPLETED: 2 } as const;
+      const statusDifference = rank[a.status as keyof typeof rank] - rank[b.status as keyof typeof rank];
+      if (statusDifference !== 0) return statusDifference;
+      return a.status === EventStatus.COMPLETED
+        ? new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        : new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+    })
+    .slice(skip, skip + limit);
+  const total = storedEvents.filter(event => {
+    const status = getAutomaticEventStatus(event);
+    return status === EventStatus.UPCOMING || status === EventStatus.ONGOING || (includeCompleted && status === EventStatus.COMPLETED);
+  }).length;
 
   return {
     events,
@@ -81,7 +112,7 @@ export const getEventBySlug = async (slug: string) => {
     throw new AppError('Event not found', 404);
   }
 
-  return event;
+  return withAutomaticStatus(event);
 };
 
 export const createEvent = async (input: CreateEventInput, createdById: string) => {
@@ -107,7 +138,9 @@ export const createEvent = async (input: CreateEventInput, createdById: string) 
       latitude: input.latitude ? parseFloat(input.latitude) : null,
       longitude: input.longitude ? parseFloat(input.longitude) : null,
       createdById,
-      status: input.status || EventStatus.DRAFT,
+      status: input.status === EventStatus.CANCELLED
+        ? EventStatus.CANCELLED
+        : getAutomaticEventStatus({ startDate: new Date(input.startDate), endDate: input.endDate ? new Date(input.endDate) : null }),
     },
   });
 };
@@ -127,6 +160,12 @@ export const updateEvent = async (id: string, input: UpdateEventInput) => {
   if (input.startDate) updateData.startDate = new Date(input.startDate);
   if (input.endDate) updateData.endDate = new Date(input.endDate);
   if (input.title) updateData.slug = slugify(input.title, { lower: true, strict: true });
+
+  const nextStartDate = updateData.startDate || event.startDate;
+  const nextEndDate = updateData.endDate || event.endDate;
+  updateData.status = input.status === EventStatus.CANCELLED
+    ? EventStatus.CANCELLED
+    : getAutomaticEventStatus({ startDate: nextStartDate, endDate: nextEndDate });
 
   return prisma.event.update({
     where: { id },
@@ -157,7 +196,7 @@ export const getEventById = async (id: string) => {
     throw new AppError('Event not found', 404);
   }
 
-  return event;
+  return withAutomaticStatus(event);
 };
 
 export const getAllEvents = async (page = 1, limit = 20) => {
@@ -173,7 +212,7 @@ export const getAllEvents = async (page = 1, limit = 20) => {
   ]);
 
   return {
-    events,
+    events: events.map(withAutomaticStatus),
     pagination: {
       page,
       limit,

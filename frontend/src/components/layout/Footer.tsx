@@ -1,11 +1,7 @@
 import { Link } from 'react-router-dom';
-import { FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
+import { FiLink, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
 import { FaFacebook, FaYoutube, FaTiktok, FaWhatsapp, FaInstagram } from 'react-icons/fa6';
 import { useSiteStore } from '../../stores/siteStore';
-import { useEffect } from 'react';
-import { socialApi } from '../../services/api';
-import { useState } from 'react';
-import type { SocialConfig } from '../../types';
 
 const iconMap: Record<string, React.ReactNode> = {
   facebook: <FaFacebook size={20} />,
@@ -16,12 +12,7 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function Footer() {
-  const { settings, footerMenu, services } = useSiteStore();
-  const [socials, setSocials] = useState<SocialConfig[]>([]);
-
-  useEffect(() => {
-    socialApi.getConfigs().then(({ data }) => setSocials(data));
-  }, []);
+  const { settings, footerMenu, services, socialConfigs } = useSiteStore();
 
   return (
     <footer className="bg-dark text-cream">
@@ -29,16 +20,16 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <img src={settings.logo_url || '/logo.svg'} alt={settings.site_name || 'REDES'} className="h-10 w-10" />
-              <h3 className="font-display text-4xl text-gold tracking-wider">
-                {settings.site_name || 'REDES'}
-              </h3>
+              <img src={settings.logo_url || '/logo.svg'} alt={settings.site_name || 'REDES'} className="h-10 w-10 logo-on-dark" />
+               <p className="font-display text-4xl text-gold tracking-wider" role="heading" aria-level={2}>
+                 {settings.site_name || 'REDES'}
+               </p>
             </div>
             <p className="text-silver text-sm leading-relaxed mb-4">
               {settings.site_description || ''}
             </p>
             <div className="flex gap-4">
-              {socials.filter(s => s.isActive && s.accountUrl).map((s) => (
+              {socialConfigs.filter(s => s.isActive && s.accountUrl).map((s) => (
                 <a
                   key={s.platform}
                   href={s.accountUrl!}
@@ -47,16 +38,16 @@ export default function Footer() {
                   className="text-silver hover:text-gold transition-colors"
                   aria-label={s.platform}
                 >
-                  {iconMap[s.platform] || null}
+                   {iconMap[s.platform] || <FiLink size={20} />}
                 </a>
               ))}
             </div>
           </div>
 
           <div>
-            <h4 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-              Navegación
-            </h4>
+             <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
+               Navegación
+             </h2>
             <ul className="space-y-2">
               {footerMenu.map((item) => (
                 <li key={item.id}>
@@ -72,9 +63,9 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-              Contacto
-            </h4>
+             <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
+               Contacto
+             </h2>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-silver text-sm">
                 <FiMapPin className="mt-0.5 text-gold flex-shrink-0" />
@@ -88,17 +79,19 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3 text-silver text-sm">
                 <FiMail className="text-gold flex-shrink-0" />
-                <a href={`mailto:${settings.email || ''}`} className="hover:text-gold">
-                  {settings.email || ''}
-                </a>
-              </li>
-            </ul>
+               <a href={`mailto:${settings.email || ''}`} className="hover:text-gold">
+                   {settings.email || ''}
+                 </a>
+               </li>
+               {settings.external_form_url && <li><a href={settings.external_form_url} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Formulario externo</a></li>}
+               {settings.donation_url && <li><a href={settings.donation_url} target="_blank" rel="noopener noreferrer" className="hover:text-gold">Donaciones</a></li>}
+             </ul>
           </div>
 
           <div>
-            <h4 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
-              Reuniones
-            </h4>
+             <h2 className="font-heading text-gold font-semibold uppercase tracking-wider text-sm mb-4">
+               Reuniones
+             </h2>
             <ul className="space-y-2 text-silver text-sm">
               {services.map((s) => (
                 <li key={s.id} className="flex justify-between">

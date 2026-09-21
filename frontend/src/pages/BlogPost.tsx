@@ -12,6 +12,8 @@ import {
 } from 'react-share';
 import { postsApi } from '@/services/api';
 import type { BlogPost } from '@/types';
+import Seo from '@/components/Seo';
+import DOMPurify from 'dompurify';
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -50,9 +52,11 @@ export default function BlogPost() {
 
   const shareUrl = `${window.location.origin}/blog/${post.slug}`;
   const title = post.title;
+  const description = post.excerpt || `Lee ${post.title} en el blog del Ministerio REDES.`;
 
   return (
     <article>
+      <Seo title={`${post.title} | Ministerio REDES`} description={description} image={post.coverImageUrl || '/assets/blog/adoracion.jpg'} type="article" />
       {/* Header */}
       <header className="relative bg-dark py-20 md:py-28">
         <div className="container-custom">
@@ -74,7 +78,8 @@ export default function BlogPost() {
                   className="text-xs font-heading font-medium px-3 py-1 rounded-full"
                   style={{
                     backgroundColor: tag.color ? `${tag.color}30` : '#C9A84C30',
-                    color: tag.color || '#C9A84C',
+                    color: '#F5D36A',
+                    border: `1px solid ${tag.color || '#C9A84C'}80`,
                   }}
                 >
                   {tag.name}
@@ -121,6 +126,7 @@ export default function BlogPost() {
           <img
             src={post.coverImageUrl}
             alt={post.title}
+            decoding="async"
             className="w-full aspect-[21/9] object-cover rounded-xl shadow-xl"
           />
         </div>
@@ -130,7 +136,7 @@ export default function BlogPost() {
       <div className="container-custom max-w-3xl py-12">
         <div
           className="blog-content prose prose-lg max-w-none prose-headings:font-heading prose-headings:text-dark prose-p:text-dark-light prose-a:text-gold prose-a:no-underline hover:prose-a:underline"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content, { ADD_ATTR: ['target', 'rel'] }) }}
         />
 
         {/* Share */}

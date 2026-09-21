@@ -33,6 +33,11 @@ router.post('/upload', authenticate, upload.single('file'), async (req: AuthRequ
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    const label = req.body.label?.trim();
+    if (!label) {
+      return res.status(400).json({ error: 'Debes asignar al menos una etiqueta.' });
+    }
+
     const b64 = Buffer.from(req.file.buffer).toString('base64');
     const dataURI = `data:${req.file.mimetype};base64,${b64}`;
 
@@ -59,6 +64,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req: AuthRequ
         fileSize: BigInt(req.file.size),
         width: result.width,
         height: result.height,
+        label,
         uploadedById: req.user!.id,
       },
     });
@@ -69,11 +75,69 @@ router.post('/upload', authenticate, upload.single('file'), async (req: AuthRequ
   }
 });
 
-router.get('/', authenticate, async (_req, res, next) => {
+router.get('/usage/:url', authenticate, async (req: AuthRequest, res) => {
   try {
+    const url = decodeURIComponent(req.params.url);
+    const usage: string[] = [];
+
+    const events = await prisma.event.findMany({
+      where: { flyerUrl: url },
+      select: { id: true, title: true },
+    });
+    events.forEach((e) => usage.push(`Evento: ${e.title}`));
+
+    const posts = await prisma.blogPost.findMany({
+      where: { OR: [{ coverImageUrl: url }, { content: { contains: url } }] },
+      select: { id: true, title: true },
+    });
+    posts.forEach((p) => usage.push(`Blog: ${p.title}`));
+
+    const settings = await prisma.siteSetting.findMany({
+      where: { value: url },
+      select: { key: true, label: true },
+    });
+    settings.forEach((s) => usage.push(`Config: ${s.label || s.key}`));
+
+    const heroSlides = await prisma.pageContent.findMany({
+      where: { OR: [{ imageUrl: url }, { body: { contains: url } }] },
+      select: { key: true, section: true },
+    });
+    heroSlides.forEach((h) => usage.push(`Contenido: ${h.section}/${h.key}`));
+
+    res.json({ usage, count: usage.length });
+  } catch (error) {
+    res.json({ usage: [], count: 0 });
+  }
+});
+
+router.get('/', authenticate, async (req, res, next) => {
+  try {
+    const { search } = req.query;
+    const where = search
+      ? {
+          OR: [
+            { fileName: { contains: String(search), mode: 'insensitive' as const } },
+            { label: { contains: String(search), mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
     const media = await prisma.media.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: 100,
+    });
+    res.json(media);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/:id/label', authenticate, async (req: AuthRequest, res, next) => {
+  try {
+    const { label } = req.body;
+    const media = await prisma.media.update({
+      where: { id: req.params.id },
+      data: { label: label || null },
     });
     res.json(media);
   } catch (error) {
@@ -95,6 +159,31 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res, next) => {
     res.status(204).send();
   } catch (error) {
     next(error);
+  }
+});
+
+router.get('/health', authenticate, async (_req, res) => {
+  try {
+    const config = cloudinary.config();
+    const hasConfig = !!(config.cloud_name && config.api_key && config.api_secret);
+
+    if (!hasConfig) {
+      return res.json({ status: 'error', message: 'Cloudinary credentials not configured', config: false });
+    }
+
+    const result = await cloudinary.api.ping();
+    res.json({
+      status: 'ok',
+      config: true,
+      cloud_name: config.cloud_name,
+      result,
+    });
+  } catch (error: any) {
+    res.json({
+      status: 'error',
+      message: error.message || 'Cloudinary connection failed',
+      config: !!cloudinary.config().cloud_name,
+    });
   }
 });
 

@@ -40,40 +40,14 @@ export interface Tag {
   color: string | null;
 }
 
-export interface Badge {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  iconUrl: string | null;
-  type: string;
-  color: string | null;
-  criteria: string | null;
-  isActive: boolean;
-}
-
-export interface Member {
-  id: string;
-  user: {
-    firstName: string | null;
-    lastName: string | null;
-    avatarUrl: string | null;
-  };
-  phone: string | null;
-  bio: string | null;
-  groupName: string | null;
-  status: string | null;
-  badges: {
-    badge: Badge;
-    awardedDate: string;
-    notes: string | null;
-  }[];
-}
-
 export interface SocialConfig {
+  id?: string;
   platform: string;
   accountUrl: string | null;
   feedUrl: string | null;
+  iconName: string | null;
+  color: string | null;
+  order: number;
   isActive: boolean;
 }
 

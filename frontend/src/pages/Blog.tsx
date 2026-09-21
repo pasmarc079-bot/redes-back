@@ -3,10 +3,16 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { postsApi } from '@/services/api';
 import type { BlogPost } from '@/types';
+import Seo from '@/components/Seo';
+import { useSiteStore } from '@/stores/siteStore';
+import ResponsiveCover from '@/components/layout/ResponsiveCover';
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const pageSettings = useSiteStore((state) => state.settings);
+  const blogContent = useSiteStore((state) => state.content.blog || []);
+  const getText = (key: string, fallback: string) => blogContent.find(item => item.key === key)?.body || fallback;
 
   useEffect(() => {
     postsApi
@@ -18,13 +24,16 @@ export default function Blog() {
 
   return (
     <div>
-      <section className="relative bg-dark py-20 md:py-28">
-        <div className="container-custom text-center">
+      <Seo title="Blog | Ministerio REDES" description="Reflexiones, noticias y testimonios del Ministerio Cristiano REDES." />
+      <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
+        <ResponsiveCover desktopImage={pageSettings.blog_cover_image_url} mobileImage={pageSettings.blog_cover_image_mobile_url} alt="" />
+        {(pageSettings.blog_cover_image_url || pageSettings.blog_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
-            Reflexiones y Noticias
+            {getText('blog_page_description', 'Reflexiones y Noticias')}
           </p>
           <h1 className="font-display text-5xl md:text-7xl text-gold tracking-wider">
-            Blog
+            {getText('blog_page_title', 'Blog')}
           </h1>
         </div>
       </section>
@@ -48,7 +57,7 @@ export default function Blog() {
               {posts.map((post, index) => (
                 <motion.div
                   key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={false}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
@@ -59,6 +68,8 @@ export default function Blog() {
                         <img
                           src={post.coverImageUrl}
                           alt={post.title}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
@@ -75,16 +86,17 @@ export default function Blog() {
                             className="text-xs font-heading font-medium px-2 py-1 rounded-full"
                             style={{
                               backgroundColor: tag.color ? `${tag.color}20` : '#C9A84C20',
-                              color: tag.color || '#C9A84C',
+                              color: '#5B4300',
+                              border: `1px solid ${tag.color || '#C9A84C'}40`,
                             }}
                           >
                             {tag.name}
                           </span>
                         ))}
                       </div>
-                      <h3 className="font-heading text-lg font-bold text-dark mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
-                        {post.title}
-                      </h3>
+                       <h2 className="font-heading text-lg font-bold text-dark mb-2 group-hover:text-gold-dark transition-colors line-clamp-2">
+                         {post.title}
+                       </h2>
                       {post.excerpt && (
                         <p className="text-sm text-dark-light line-clamp-3">{post.excerpt}</p>
                       )}

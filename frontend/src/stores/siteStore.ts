@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { siteApi } from '../services/api';
-import type { SiteSettings, MenuItem, PageContent, ServiceSchedule } from '../types';
+import { siteApi, socialApi } from '../services/api';
+import type { SiteSettings, MenuItem, PageContent, ServiceSchedule, SocialConfig } from '../types';
 
 interface SiteState {
   settings: SiteSettings;
@@ -8,11 +8,13 @@ interface SiteState {
   footerMenu: MenuItem[];
   services: ServiceSchedule[];
   content: Record<string, PageContent[]>;
+  socialConfigs: SocialConfig[];
   loading: boolean;
   fetchSettings: () => Promise<void>;
   fetchMenu: (location: string) => Promise<void>;
   fetchServices: () => Promise<void>;
   fetchContent: (section?: string) => Promise<void>;
+  fetchSocialConfigs: () => Promise<void>;
 }
 
 export const useSiteStore = create<SiteState>((set) => ({
@@ -21,6 +23,7 @@ export const useSiteStore = create<SiteState>((set) => ({
   footerMenu: [],
   services: [],
   content: {},
+  socialConfigs: [],
   loading: true,
 
   fetchSettings: async () => {
@@ -47,5 +50,10 @@ export const useSiteStore = create<SiteState>((set) => ({
       grouped[item.section].push(item);
     });
     set((state) => ({ content: { ...state.content, ...grouped } }));
+  },
+
+  fetchSocialConfigs: async () => {
+    const { data } = await socialApi.getConfigs();
+    set({ socialConfigs: data });
   },
 }));
