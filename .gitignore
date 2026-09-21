@@ -53,3 +53,9 @@ lives/
 assets/
 drafts/
 .env.example
+!backend/.env.example
+!frontend/public/assets/
+!frontend/public/assets/events/
+!frontend/public/assets/events/*.png
+!frontend/public/assets/blog/
+!frontend/public/assets/blog/*.jpg
