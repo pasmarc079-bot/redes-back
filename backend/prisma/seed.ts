@@ -6,6 +6,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
+  const existingAdmin = await prisma.user.findUnique({ where: { username: 'pasmarc079' }, select: { id: true } });
+  if (existingAdmin) {
+    console.log('ℹ️ Database already initialized; skipping destructive seed.');
+    return;
+  }
+
   await prisma.postTag.deleteMany();
   await prisma.tag.deleteMany();
   await prisma.blogPost.deleteMany();

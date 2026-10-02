@@ -59,7 +59,7 @@ Cada servicio se despliega de forma independiente como **Web Service** en Seenod
 
 | Servicio | Root Dir | Build Command | Start Command | Port |
 |----------|----------|---------------|---------------|------|
-| **Backend** | `backend` | `npm install && npx prisma generate && npm run build` | `npx prisma migrate deploy && npm start` | 8080 |
+| **Backend** | `backend` | `npm ci && npx prisma generate && npm run build` | `npm start` (migrate + seed inicial seguro + server) | 8080 |
 | **Frontend** | `frontend` | `npm install && npm run build` | `node server.cjs` | 8080 |
 
 ### Base de datos
