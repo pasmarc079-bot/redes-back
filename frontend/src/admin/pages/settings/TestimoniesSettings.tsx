@@ -262,13 +262,39 @@ function GoogleConnectionCard({ status }: { status: GoogleStatus | null }) {
     : null;
 
   if (!status.configured) {
+    const faltaClave = status.missing?.includes('GOOGLE_API_KEY');
+    const faltaNegocio = status.missing?.includes('GOOGLE_PLACE_ID');
+
     return (
       <section className="card card-body border-amber-200 bg-amber-50/60" aria-labelledby="google-status-heading">
         <h4 id="google-status-heading" className="flex items-center gap-2 font-heading text-lg font-semibold text-gray-800">
           <FiAlertTriangle className="text-amber-600" aria-hidden="true" /> Las reseñas de Google aún no están conectadas
         </h4>
         <p className="mt-2 text-sm text-gray-700">
-          Las reseñas se leen de la ficha de Google de la iglesia. Mientras el equipo técnico no active esa conexión, los visitantes no verán este bloque.
+          Las reseñas se leen de la ficha de Google de la iglesia. Hasta conectarlas, los visitantes no verán este bloque.
+        </p>
+        <ul className="mt-3 space-y-1.5 text-sm text-gray-700">
+          {faltaClave && (
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              <span>
+                Falta la <code className="rounded bg-white px-1 py-0.5 text-xs">GOOGLE_API_KEY</code>: la clave que autoriza a leer la
+                ficha de Google. Se agrega una sola vez en el panel de Seenode, en <em>Environment variables</em> del backend.
+              </span>
+            </li>
+          )}
+          {faltaNegocio && (
+            <li className="flex gap-2">
+              <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              <span>
+                Falta el <code className="rounded bg-white px-1 py-0.5 text-xs">GOOGLE_PLACE_ID</code>: el identificador del negocio
+                en Google.
+              </span>
+            </li>
+          )}
+        </ul>
+        <p className="mt-3 text-xs text-gray-500">
+          En cuanto se agreguen, la conexión se activa sola y las reseñas aparecen en el sitio sin necesidad de tocar nada más.
         </p>
       </section>
     );
