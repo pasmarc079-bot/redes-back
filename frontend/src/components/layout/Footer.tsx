@@ -3,6 +3,8 @@ import { FiLink, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
 import { FaFacebook, FaYoutube, FaTiktok, FaWhatsapp, FaInstagram } from 'react-icons/fa6';
 import { useSiteStore } from '../../stores/siteStore';
 import { ensureAbsoluteUrl } from '../../utils/phone';
+import { buildMapLink, buildMapQuery } from '@/utils/maps';
+import { useGoogleSummary } from '@/hooks/useGoogleSummary';
 
 const iconMap: Record<string, React.ReactNode> = {
   facebook: <FaFacebook size={20} />,
@@ -14,6 +16,11 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export default function Footer() {
   const { settings, footerMenu, services, socialConfigs } = useSiteStore();
+  const googleSummary = useGoogleSummary();
+  const footerMapUrl = buildMapLink(
+    buildMapQuery({ name: googleSummary?.name ?? settings.google_business_name, address: googleSummary?.address ?? settings.address }),
+    googleSummary?.profileUrl || settings.google_maps_url,
+  );
 
   return (
     <footer className="bg-dark text-cream">
@@ -70,7 +77,16 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-silver text-sm">
                 <FiMapPin className="mt-0.5 text-gold flex-shrink-0" />
-                <span>{settings.address || ''}</span>
+                {settings.address ? (
+                  <a
+                    href={footerMapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-gold"
+                  >
+                    {settings.address}
+                  </a>
+                ) : null}
               </li>
               <li className="flex items-center gap-3 text-silver text-sm">
                 <FiPhone className="text-gold flex-shrink-0" />

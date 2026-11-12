@@ -68,6 +68,12 @@ export const mediaApi = {
   health: () => api.get('/admin/media/health').then(r => r.data),
 };
 
+export const testimonialsApi = {
+  getVideos: () => api.get('/testimonials/videos'),
+  getReviews: () => api.get('/testimonials/reviews'),
+  getReviewSummary: () => api.get('/testimonials/reviews/summary'),
+};
+
 export const contactApi = {
   submit: (data: { name: string; email: string; message: string }) =>
     api.post('/contact', data).then(r => r.data),

@@ -93,3 +93,31 @@ export interface Pagination {
   total: number;
   totalPages: number;
 }
+
+export interface TestimonialVideo {
+  id: string;
+  title: string;
+  sourceType: 'youtube' | 'upload';
+  videoUrl: string;
+  posterUrl: string | null;
+  order: number;
+  isActive: boolean;
+}
+
+export interface GoogleReviewSummary {
+  rating: number | null;
+  totalRatings: number;
+  profileUrl: string | null;
+  address: string | null;
+  name: string | null;
+}
+
+export interface GoogleReview {
+  id: string;
+  authorName: string;
+  rating: number;
+  text: string;
+  reviewDate: string | null;
+  order: number;
+  isActive: boolean;
+}

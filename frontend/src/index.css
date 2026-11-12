@@ -15,8 +15,15 @@
     @apply font-heading font-bold text-dark;
   }
 
-  a {
-    @apply text-gold hover:text-gold-dark transition-colors;
+  /* The default link colour is applied through :where() on purpose: it has zero specificity,
+     so any explicit colour utility (a button, for example) always wins. With a plain `a:hover`
+     the rule beat `.text-dark` and turned gold buttons into gold-on-gold on hover. */
+  :where(a) {
+    @apply text-gold transition-colors;
+  }
+
+  :where(a:hover) {
+    @apply text-gold-dark;
   }
 }
 
@@ -162,6 +169,21 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
+  /* Stronger shadow for text over photographs, so gold lettering stays readable. */
+  .hero-text-shadow {
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Darkens the middle of the photo, where the text sits, and keeps the edges visible. */
+  .hero-veil {
+    background: radial-gradient(
+      ellipse 68% 58% at 50% 50%,
+      rgba(26, 26, 26, 0.92) 0%,
+      rgba(26, 26, 26, 0.74) 45%,
+      rgba(26, 26, 26, 0.34) 100%
+    );
+  }
+
   /* Blog content */
   .blog-content iframe {
     @apply rounded-lg w-full;
@@ -192,5 +214,104 @@
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
+  }
+
+  /* Press feedback. It lives in the utilities layer on purpose: that way it wins over the
+     transition-* utilities of Tailwind and the scale always animates. */
+  .press {
+    transition-property: transform, background-color, color, border-color, opacity;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Testimonies: press feedback, horizontal rails, poster hover, reduced motion. */
+@layer components {
+  .rail {
+    scrollbar-width: thin;
+  }
+
+  .rail-dark {
+    scrollbar-color: rgb(201 168 76 / 0.5) transparent;
+  }
+
+  .rail-light {
+    scrollbar-color: rgb(26 26 26 / 0.25) transparent;
+  }
+
+  .testimony-poster {
+    transition: transform 400ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .testimony-play {
+    transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .testimony-tile:hover .testimony-poster {
+      transform: scale(1.04);
+    }
+
+    .testimony-tile:hover .testimony-play {
+      transform: translate(-50%, -50%) scale(1.06);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .press,
+    .press:active {
+      transition: none;
+      transform: none;
+    }
+
+    .testimony-poster,
+    .testimony-play {
+      transition: none;
+    }
+  }
+}
+
+/* Hero carousel: slow Ken Burns on the active image, copy rises in once per slide. */
+@layer components {
+  .hero-image {
+    transform: scale(1.06);
+    transition: transform 7000ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .hero-image.is-active {
+    transform: scale(1);
+  }
+
+  .hero-copy > * {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition: opacity 600ms cubic-bezier(0.23, 1, 0.32, 1), transform 600ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .hero-copy.is-active > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-copy.is-active > :nth-child(2) { transition-delay: 90ms; }
+  .hero-copy.is-active > :nth-child(3) { transition-delay: 180ms; }
+  .hero-copy.is-active > :nth-child(4) { transition-delay: 260ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-image,
+    .hero-image.is-active {
+      transform: none;
+      transition: none;
+    }
+
+    .hero-copy > *,
+    .hero-copy.is-active > * {
+      transform: none;
+      transition: opacity 200ms ease-out;
+    }
   }
 }

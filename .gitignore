@@ -44,6 +44,9 @@ tests/blob-report/
 *.tsbuildinfo
 .cache/
 backend/cloudinary-test.ts
+session-*.md
+new-requirement/references/
+tmp/
 
 # SSL certificates
 *.pem
@@ -59,3 +62,5 @@ drafts/
 !frontend/public/assets/events/*.png
 !frontend/public/assets/blog/
 !frontend/public/assets/blog/*.jpg
+
+*.tsx-e

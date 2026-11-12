@@ -3,6 +3,7 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import { useSiteStore } from '@/stores/siteStore';
 import Seo from '@/components/Seo';
 import SocialChannelsSection from '@/components/social/SocialChannelsSection';
+import TestimoniesSection from '@/sections/testimonies';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
 import { normalizeWhatsAppNumber } from '@/utils/phone';
 
@@ -37,14 +38,16 @@ export default function Community() {
         </div>
       </section>
 
-       <SocialChannelsSection eyebrow="Comunidad" title="Síguenos en Redes Sociales" variant="light" />
+      <TestimoniesSection variant="community" />
 
-      <section className="section-padding bg-dark">
+      <SocialChannelsSection eyebrow="Comunidad" title="Síguenos en Redes Sociales" variant="dark" />
+
+      <section className="section-padding bg-cream">
         <div className="container-custom text-center">
-          <h2 className="font-display text-3xl md:text-4xl text-gold tracking-wider mb-4">
+          <h2 className="font-display text-3xl md:text-4xl text-dark tracking-wider mb-4">
             Únete a Nuestra Comunidad
           </h2>
-          <p className="text-silver mb-8 max-w-xl mx-auto">
+          <p className="text-dark-light mb-8 max-w-xl mx-auto">
             Contáctanos por WhatsApp y sé parte de esta gran familia de fe.
           </p>
           <a

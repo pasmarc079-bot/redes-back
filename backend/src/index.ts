@@ -15,6 +15,7 @@ import mediaRoutes from './routes/media.routes';
 import socialRoutes from './routes/social.routes';
 import siteRoutes from './routes/site.routes';
 import contactRoutes from './routes/contact.routes';
+import testimonialRoutes from './routes/testimonial.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -37,6 +38,14 @@ app.use(cookieParser());
 // Rate limiting
 app.use('/api/', rateLimiter);
 
+// API responses are revalidated on every request: the browser may store them, but it always
+// checks with the server first (the ETag makes it a cheap 304). Without this, a change saved
+// in the admin can stay invisible on the public site until the cache expires.
+app.use('/api/v1', (_req, res, next) => {
+  res.set('Cache-Control', 'no-cache');
+  next();
+});
+
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -50,6 +59,7 @@ app.use('/api/v1/admin/media', mediaRoutes);
 app.use('/api/v1/social', socialRoutes);
 app.use('/api/v1/site', siteRoutes);
 app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/testimonials', testimonialRoutes);
 
 // Admin routes (protected)
 app.use('/api/v1/admin/events', eventRoutes);

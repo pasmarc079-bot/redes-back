@@ -4,8 +4,11 @@ import { showToast } from '@/admin/components/ui/Toast';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import { siteApi, socialApi } from '@/services/api';
 import { normalizeWhatsAppNumber, isValidWhatsAppNumber, formatWhatsAppNumber } from '@/utils/phone';
+import TestimoniesSettings from './TestimoniesSettings';
+import HeroSlidesSettings from './HeroSlidesSettings';
+import { getSitePage, type SitePageId } from '@/config/sitePages';
 
-type PageId = 'home' | 'about' | 'events' | 'blog' | 'community' | 'contact';
+type PageId = SitePageId;
 type FieldSource = 'content' | 'setting';
 type FieldType = 'text' | 'textarea' | 'image' | 'boolean';
 
@@ -63,10 +66,7 @@ interface PageDefinition {
 
 const pages: PageDefinition[] = [
   {
-    id: 'home',
-    label: 'Inicio',
-    description: 'Presenta el ministerio y dirige a los visitantes a las secciones principales.',
-    url: '/',
+    ...getSitePage('home')!,
     fields: [
       { key: 'hero_title', label: 'Título principal de portada', source: 'content', type: 'text' },
       { key: 'hero_subtitle', label: 'Subtítulo', source: 'content', type: 'text' },
@@ -77,10 +77,7 @@ const pages: PageDefinition[] = [
     ],
   },
   {
-    id: 'about',
-    label: 'Nosotros',
-    description: 'Cuenta quiénes somos, nuestra historia, misión y visión.',
-    url: '/nosotros',
+    ...getSitePage('about')!,
     fields: [
       { key: 'about_page_title', label: 'Título principal', source: 'content', type: 'text' },
       { key: 'about_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
@@ -93,10 +90,7 @@ const pages: PageDefinition[] = [
     ],
   },
   {
-    id: 'events',
-    label: 'Eventos',
-    description: 'Presenta el encabezado de la sección de eventos.',
-    url: '/eventos',
+    ...getSitePage('events')!,
       fields: [
         { key: 'events_page_title', label: 'Título de la página', source: 'content', type: 'text' },
         { key: 'events_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
@@ -105,10 +99,7 @@ const pages: PageDefinition[] = [
     ],
   },
   {
-    id: 'blog',
-    label: 'Blog',
-    description: 'Presenta el encabezado de artículos, reflexiones y noticias.',
-    url: '/blog',
+    ...getSitePage('blog')!,
       fields: [
         { key: 'blog_page_title', label: 'Título de la página', source: 'content', type: 'text' },
         { key: 'blog_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
@@ -117,10 +108,7 @@ const pages: PageDefinition[] = [
     ],
   },
   {
-    id: 'community',
-    label: 'Comunidad',
-    description: 'Invita a las personas a conectarse con la comunidad REDES.',
-    url: '/comunidad',
+    ...getSitePage('community')!,
       fields: [
         { key: 'community_page_title', label: 'Título de la página', source: 'content', type: 'text' },
         { key: 'community_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
@@ -129,10 +117,7 @@ const pages: PageDefinition[] = [
     ],
   },
   {
-    id: 'contact',
-    label: 'Contacto',
-    description: 'Muestra cómo visitar y comunicarse con el ministerio.',
-    url: '/contacto',
+    ...getSitePage('contact')!,
       fields: [
         { key: 'contact_welcome', label: 'Mensaje de bienvenida', source: 'content', type: 'text' },
         { key: 'contact_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
@@ -149,7 +134,7 @@ export default function Settings() {
   const [contents, setContents] = useState<PageContent[]>([]);
   const [socials, setSocials] = useState<SocialConfig[]>([]);
   const [selectedPage, setSelectedPage] = useState<PageId | null>(null);
-  const [activeSection, setActiveSection] = useState<'pages' | 'external'>('pages');
+  const [activeSection, setActiveSection] = useState<'pages' | 'external' | 'testimonies' | 'hero'>('pages');
   const [savingPage, setSavingPage] = useState(false);
   const [savingMenu, setSavingMenu] = useState(false);
   const [savingExternal, setSavingExternal] = useState(false);
@@ -301,7 +286,7 @@ export default function Settings() {
   const saveExternal = async () => {
     setSavingExternal(true);
     try {
-      const contactKeys = new Set(['phone', 'phone_international', 'whatsapp_number', 'whatsapp_message', 'email', 'address', 'google_maps_url', 'donation_url', 'external_form_url']);
+      const contactKeys = new Set(['phone', 'phone_international', 'whatsapp_number', 'whatsapp_message', 'email', 'address', 'google_maps_url', 'google_review_url', 'google_business_name', 'donation_url', 'external_form_url']);
       const contactSettings = Object.fromEntries(settings.filter(item => contactKeys.has(item.key)).map(item => [item.key, item.value]));
       const savedSocials = await Promise.all([
         siteApi.updateSettings(contactSettings),
@@ -323,6 +308,8 @@ export default function Settings() {
       <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4" role="tablist" aria-label="Configuración del sitio">
         <button type="button" role="tab" aria-selected={activeSection === 'pages'} onClick={() => setActiveSection('pages')} className={`tab ${activeSection === 'pages' ? 'tab-active' : 'tab-inactive'}`}>Configuración de Páginas</button>
         <button type="button" role="tab" aria-selected={activeSection === 'external'} onClick={() => setActiveSection('external')} className={`tab ${activeSection === 'external' ? 'tab-active' : 'tab-inactive'}`}>Enlaces Externos y Contacto</button>
+        <button type="button" role="tab" aria-selected={activeSection === 'hero'} onClick={() => setActiveSection('hero')} className={`tab ${activeSection === 'hero' ? 'tab-active' : 'tab-inactive'}`}>Portada</button>
+        <button type="button" role="tab" aria-selected={activeSection === 'testimonies'} onClick={() => setActiveSection('testimonies')} className={`tab ${activeSection === 'testimonies' ? 'tab-active' : 'tab-inactive'}`}>Testimonios</button>
       </div>
 
       {activeSection === 'pages' ? (
@@ -452,6 +439,10 @@ export default function Settings() {
         }}
       />
       </>
+      ) : activeSection === 'hero' ? (
+        <HeroSlidesSettings />
+      ) : activeSection === 'testimonies' ? (
+        <TestimoniesSettings />
       ) : (
         <ExternalContactSettings
           settings={settings}
@@ -488,8 +479,10 @@ function ExternalContactSettings({ settings, socials, updateSetting, updateSocia
     ['phone_international', 'Teléfono para enlaces (tel:)', 'text', 'Usado en botones "Llamar" del Footer y página Contacto. Debe incluir código de país. Ej: +593994538859'],
     ['whatsapp_number', 'WhatsApp oficial (wa.me)', 'text', 'Usado en botones de WhatsApp (Comunidad, botón flotante, página Contacto). Formato: +593 99 786 7727 o 593997867727. Se limpia automáticamente.'],
     ['email', 'Correo electrónico institucional', 'email', 'Usado en Footer, página Contacto y formularios. Ej: ministerio@ejemplo.com'],
-    ['address', 'Dirección física completa', 'textarea', 'Usado en Footer, página Contacto, About y Google Maps.'],
-    ['google_maps_url', 'Enlace de Google Maps', 'url', 'Enlace directo a Maps. Si vacío, se genera automáticamente desde la dirección.'],
+    ['address', 'Dirección física completa', 'textarea', 'Incluye calle, número y ciudad (ej: 20 de Junio y Cotopaxi, Lago Agrio, Ecuador). Se usa en el pie de página, Contacto, Nosotros y el mapa.'],
+    ['google_business_name', 'Nombre del negocio en Google', 'text', 'Nombre exacto de la ficha de Google, para ubicarla en el mapa. Ej: Ministerio Redes'],
+    ['google_maps_url', 'Enlace de Google Maps (perfil de la iglesia)', 'url', 'Pega el enlace compartido del perfil de Google. Si está vacío, el sitio genera el mapa con el nombre y la dirección.'],
+    ['google_review_url', 'Enlace para dejar reseña en Google', 'url', 'Enlace que abre directamente el formulario para escribir una reseña. Si está vacío, el botón no se muestra.'],
     ['external_form_url', 'Formulario externo', 'url', 'Enlace a formulario externo (Google Forms, Typeform, etc.). Opcional.'],
     ['donation_url', 'Enlace de donaciones', 'url', 'Enlace a plataforma de donaciones. Opcional.'],
     ['whatsapp_message', 'Mensaje predeterminado de WhatsApp', 'textarea', 'Texto que se precarga al abrir chat. Ej: "Hola! Quisiera información..."'],
@@ -568,7 +561,7 @@ function ExternalContactSettings({ settings, socials, updateSetting, updateSocia
             );
           })}
         </div>
-        <p className="mt-4 flex items-start gap-2 text-xs text-gray-500"><FiLink className="mt-0.5 shrink-0" />Los enlaces de Google Maps, donaciones y formularios son opcionales; si están vacíos, no se muestran.</p>
+        <p className="mt-4 flex items-start gap-2 text-xs text-gray-500"><FiLink className="mt-0.5 shrink-0" />Los enlaces de Google, donaciones y formularios son opcionales; si están vacíos, no se muestran.</p>
         <button type="button" onClick={saveExternal} disabled={saving} className="btn btn-primary mt-6"><FiSave /> {saving ? 'Guardando...' : 'Guardar enlaces y contacto'}</button>
       </section>
     </div>

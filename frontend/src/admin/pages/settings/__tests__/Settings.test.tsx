@@ -155,7 +155,7 @@ describe('Configuración de Páginas', () => {
 
     await waitFor(() => expect(screen.getByRole('tab', { name: 'Enlaces Externos y Contacto' })).toBeInTheDocument());
     await user.click(screen.getByRole('tab', { name: 'Enlaces Externos y Contacto' }));
-    await user.type(screen.getByLabelText('Enlace de Google Maps'), 'https://maps.google.com/?q=redes');
+    await user.type(screen.getByLabelText('Enlace de Google Maps (perfil de la iglesia)'), 'https://maps.google.com/?q=redes');
     await user.click(screen.getByRole('button', { name: 'Guardar enlaces y contacto' }));
 
     await waitFor(() => {

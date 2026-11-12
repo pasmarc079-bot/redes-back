@@ -29,8 +29,9 @@ interface SocialChannelsSectionProps {
 
 export default function SocialChannelsSection({ eyebrow, title, variant = 'dark' }: SocialChannelsSectionProps) {
   const socialConfigs = useSiteStore((state) => state.socialConfigs);
+  // WhatsApp has its own call to action on the page, so it is not repeated as a network card.
   const activeConfigs = socialConfigs
-    .filter(config => config.isActive && config.accountUrl)
+    .filter(config => config.isActive && config.accountUrl && config.platform.toLowerCase() !== 'whatsapp')
     .sort((a, b) => a.order - b.order);
 
   if (activeConfigs.length === 0) return null;
@@ -40,7 +41,9 @@ export default function SocialChannelsSection({ eyebrow, title, variant = 'dark'
     ? 'grid-cols-1 max-w-sm mx-auto'
     : activeConfigs.length === 2
       ? 'grid-cols-1 md:grid-cols-2 max-w-2xl mx-auto'
-      : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
+      : activeConfigs.length === 3
+        ? 'grid-cols-1 md:grid-cols-3'
+        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
   return (
     <section data-nav-theme={isDark ? 'dark' : undefined} className={`section-padding ${isDark ? 'bg-dark' : 'bg-cream'}`}>

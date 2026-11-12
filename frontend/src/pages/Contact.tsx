@@ -5,11 +5,15 @@ import { useSiteStore } from '../stores/siteStore';
 import { contactApi } from '../services/api';
 import Seo from '@/components/Seo';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import { buildMapEmbedUrl, buildMapLink, buildMapQuery } from '@/utils/maps';
+import { useGoogleSummary } from '@/hooks/useGoogleSummary';
 
 export default function Contact() {
   const { settings, content } = useSiteStore();
   const contactWelcome = content.contact?.find(item => item.key === 'contact_welcome')?.body || 'Conecta con nosotros';
-  const mapUrl = settings.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address || 'Lago Agrio, Ecuador')}`;
+  const googleSummary = useGoogleSummary();
+  const mapQuery = buildMapQuery({ name: googleSummary?.name ?? settings.google_business_name, address: googleSummary?.address ?? settings.address });
+  const mapUrl = buildMapLink(mapQuery, googleSummary?.profileUrl || settings.google_maps_url);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -100,7 +104,7 @@ export default function Contact() {
                 <div className="overflow-hidden rounded-xl border border-dark/10 bg-dark-light shadow-sm">
                   <iframe
                     title="Ubicación del Ministerio REDES"
-                    src={`https://www.google.com/maps?q=${encodeURIComponent(settings.address || 'Lago Agrio, Ecuador')}&output=embed`}
+                    src={buildMapEmbedUrl(mapQuery)}
                     className="h-64 w-full border-0"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
