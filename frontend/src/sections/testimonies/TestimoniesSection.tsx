@@ -56,7 +56,9 @@ export default function TestimoniesSection({ variant = 'community' }: Testimonie
     );
   }
 
-  if (videos.length === 0 && reviews.length === 0) return null;
+  // The invitation is worth showing even before there is a single review: that is exactly how
+  // the first ones are collected. The rails below hide themselves when they have no content.
+  if (videos.length === 0 && reviews.length === 0 && !reviewUrl) return null;
 
   const onDark = isHome;
 
