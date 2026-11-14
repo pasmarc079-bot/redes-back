@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.routes';
+import adminUserRoutes from './routes/admin.user.routes';
 import eventRoutes from './routes/event.routes';
 import blogRoutes from './routes/blog.routes';
 import mediaRoutes from './routes/media.routes';
@@ -53,6 +54,7 @@ app.get('/health', (_req, res) => {
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/admin/users', adminUserRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/posts', blogRoutes);
 app.use('/api/v1/admin/media', mediaRoutes);
