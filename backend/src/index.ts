@@ -70,6 +70,18 @@ app.use('/api/v1/admin/posts', blogRoutes);
 // Error handler
 app.use(errorHandler);
 
+// A weak JWT secret would let anyone forge an administrator token.
+if (process.env.NODE_ENV === 'production') {
+  const secret = process.env.JWT_SECRET || '';
+  const weak = ['dev-secret-change-in-production', 'REDES_CHANGE_ME', 'CHANGE_ME', 'secret', 'redes'];
+  if (weak.includes(secret) || secret.length < 32) {
+    console.warn(
+      '⚠️  JWT_SECRET es débil o no está definido. El panel no permitirá iniciar sesión hasta que ' +
+      'definas un valor aleatorio de 32 caracteres o más en las variables de entorno.',
+    );
+  }
+}
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   console.log(`📚 Health: http://0.0.0.0:${PORT}/health`);

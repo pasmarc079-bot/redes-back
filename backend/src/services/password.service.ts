@@ -5,6 +5,16 @@ import { AppError } from '../middleware/errorHandler';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '86400000';
+const WEAK_SECRETS = ['dev-secret-change-in-production', 'REDES_CHANGE_ME', 'CHANGE_ME', 'secret', 'redes'];
+
+const assertSecureSecret = () => {
+  if (process.env.NODE_ENV === 'production' && (!WEAK_SECRETS.includes(JWT_SECRET) || JWT_SECRET.length < 32)) {
+    throw new AppError(
+      'El servidor no está configurado de forma segura: define JWT_SECRET con un valor aleatorio de 32 caracteres o más en las variables de entorno.',
+      503,
+    );
+  }
+};
 
 const MIN_PASSWORD_LENGTH = 10;
 
@@ -31,6 +41,7 @@ const signToken = (user: { id: string; username: string; email: string }) =>
  * token is returned so the session stays alive after the change.
  */
 export const changeOwnPassword = async (userId: string, { currentPassword, newPassword }: PasswordInput) => {
+  assertSecureSecret();
   assertStrongEnough(newPassword);
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -56,6 +67,7 @@ export const changeOwnPassword = async (userId: string, { currentPassword, newPa
  * when the person who owns it cannot sign in.
  */
 export const setUserPassword = async (username: string, newPassword: string) => {
+  assertSecureSecret();
   assertStrongEnough(newPassword);
 
   const user = await prisma.user.findFirst({

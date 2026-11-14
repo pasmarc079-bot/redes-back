@@ -57,6 +57,15 @@ const withAutomaticStatus = <T extends { startDate: Date; endDate?: Date | null;
   status: getAutomaticEventStatus(event),
 });
 
+/**
+ * Removes internal fields before an event goes to the public site. The id of the user who
+ * created the event must not travel: with a weak JWT secret it is enough to forge an admin token.
+ */
+const toPublicEvent = <T extends { createdById?: string | null }>(event: T) => {
+  const { createdById: _ignored, ...rest } = event;
+  return rest;
+};
+
 export const getPublicEvents = async (page = 1, limit = 12, featured = false, includeCompleted = false) => {
   const skip = (page - 1) * limit;
 
@@ -72,6 +81,7 @@ export const getPublicEvents = async (page = 1, limit = 12, featured = false, in
 
   const events = storedEvents
     .map(withAutomaticStatus)
+    .map(toPublicEvent)
     .filter(event => event.status === EventStatus.UPCOMING || event.status === EventStatus.ONGOING || (includeCompleted && event.status === EventStatus.COMPLETED))
     .sort((a, b) => {
       const rank = { ONGOING: 0, UPCOMING: 1, COMPLETED: 2 } as const;
@@ -112,7 +122,7 @@ export const getEventBySlug = async (slug: string) => {
     throw new AppError('Event not found', 404);
   }
 
-  return withAutomaticStatus(event);
+  return toPublicEvent(withAutomaticStatus(event));
 };
 
 export const createEvent = async (input: CreateEventInput, createdById: string) => {
@@ -196,7 +206,7 @@ export const getEventById = async (id: string) => {
     throw new AppError('Event not found', 404);
   }
 
-  return withAutomaticStatus(event);
+  return toPublicEvent(withAutomaticStatus(event));
 };
 
 export const getAllEvents = async (page = 1, limit = 20) => {
