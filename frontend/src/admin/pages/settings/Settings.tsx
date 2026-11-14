@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FiChevronDown, FiChevronUp, FiEdit3, FiImage, FiLink, FiMenu, FiPlus, FiSave, FiTrash2, FiX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiChevronDown, FiChevronUp, FiEdit3, FiFolder, FiLink, FiMenu, FiPlus, FiSave, FiTrash2, FiX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { showToast } from '@/admin/components/ui/Toast';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import { siteApi, socialApi } from '@/services/api';
@@ -404,7 +404,7 @@ export default function Settings() {
                         <div className="flex h-44 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-400">No hay imagen seleccionada</div>
                       )}
                       <button type="button" className="btn btn-secondary" onClick={() => { setImageFieldKey(field.key); setMediaPickerOpen(true); }}>
-                        <FiImage /> Elegir de la biblioteca
+                        <FiFolder /> Elegir de la biblioteca
                       </button>
                       {getFieldValue(field) && <button type="button" className="ml-2 min-h-11 rounded-lg px-3 text-sm text-red-500 hover:bg-red-50" onClick={() => updateSetting(field.key, '')}><FiTrash2 className="inline" /> Quitar imagen</button>}
                     </div>

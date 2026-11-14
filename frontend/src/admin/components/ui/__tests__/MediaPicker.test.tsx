@@ -154,4 +154,11 @@ describe('MediaPicker Integration', () => {
     expect(uploadToggle).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText(/arrastra la imagen aquí o haz clic para subir/i)).toBeInTheDocument();
   });
+
+  it('abre la zona de subida cuando se pide con openWithUpload', async () => {
+    render(<MediaPicker open={true} onClose={mockOnClose} onSelect={mockOnSelect} openWithUpload />);
+
+    expect(screen.getByText(/arrastra la imagen aquí o haz clic para subir/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cerrar la subida/i })).toHaveAttribute('aria-expanded', 'true');
+  });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FiArrowDown, FiArrowUp, FiEdit3, FiImage, FiPlus, FiSave, FiTrash2, FiX } from 'react-icons/fi';
+import { FiArrowDown, FiArrowUp, FiEdit3, FiFolder, FiPlus, FiSave, FiTrash2, FiUpload, FiX } from 'react-icons/fi';
 import { showConfirm } from '@/admin/components/ui/ConfirmModal';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import PageLinkField from '@/admin/components/ui/PageLinkField';
@@ -36,6 +36,8 @@ export default function HeroSlidesSettings() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [picker, setPicker] = useState<ImageTarget | null>(null);
+  // 'library' opens the media library, 'upload' opens it straight on the upload area.
+  const [pickerMode, setPickerMode] = useState<'library' | 'upload'>('library');
   const [intervalSeconds, setIntervalSeconds] = useState(6);
   const [savingInterval, setSavingInterval] = useState(false);
 
@@ -344,8 +346,20 @@ export default function HeroSlidesSettings() {
                 <p className="text-xs text-gray-500">La imagen de computadora se ve en pantallas grandes y la de celular en las pequeñas. Si solo eliges una, se usa en las dos.</p>
                 {errors.imageUrl && <p className="text-xs text-red-600">{errors.imageUrl}</p>}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <ImageField label="Computadora" value={editing.imageUrl} onPick={() => setPicker('imageUrl')} onClear={() => setEditing({ ...editing, imageUrl: '' })} />
-                  <ImageField label="Celular" value={editing.mobileImageUrl} onPick={() => setPicker('mobileImageUrl')} onClear={() => setEditing({ ...editing, mobileImageUrl: '' })} />
+                  <ImageField
+                    label="Computadora"
+                    value={editing.imageUrl}
+                    onPick={() => { setPickerMode('library'); setPicker('imageUrl'); }}
+                    onUpload={() => { setPickerMode('upload'); setPicker('imageUrl'); }}
+                    onClear={() => setEditing({ ...editing, imageUrl: '' })}
+                  />
+                  <ImageField
+                    label="Celular"
+                    value={editing.mobileImageUrl}
+                    onPick={() => { setPickerMode('library'); setPicker('mobileImageUrl'); }}
+                    onUpload={() => { setPickerMode('upload'); setPicker('mobileImageUrl'); }}
+                    onClear={() => setEditing({ ...editing, mobileImageUrl: '' })}
+                  />
                 </div>
               </fieldset>
 
@@ -360,6 +374,7 @@ export default function HeroSlidesSettings() {
 
       <MediaPicker
         open={picker !== null}
+        openWithUpload={pickerMode === 'upload'}
         onClose={() => setPicker(null)}
         onSelect={(url) => {
           if (picker && editing) setEditing({ ...editing, [picker]: url });
@@ -370,15 +385,32 @@ export default function HeroSlidesSettings() {
   );
 }
 
-function ImageField({ label, value, onPick, onClear }: { label: string; value: string; onPick: () => void; onClear: () => void }) {
+function ImageField({
+  label,
+  value,
+  onPick,
+  onUpload,
+  onClear,
+}: {
+  label: string;
+  value: string;
+  onPick: () => void;
+  onUpload: () => void;
+  onClear: () => void;
+}) {
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-gray-700">{label}</p>
       <div className="flex h-28 items-center justify-center overflow-hidden rounded-xl border border-dashed border-gray-300 bg-gray-50">
         {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : <span className="text-xs text-gray-400">Sin imagen</span>}
       </div>
-      <div className="flex gap-2">
-        <button type="button" onClick={onPick} className="btn btn-secondary flex-1"><FiImage aria-hidden="true" /> {value ? 'Cambiar' : 'Elegir'}</button>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" onClick={onPick} className="btn btn-secondary flex-1 whitespace-nowrap">
+          <FiFolder aria-hidden="true" /> {value ? 'Cambiar' : 'Elegir'}
+        </button>
+        <button type="button" onClick={onUpload} className="btn btn-secondary flex-1 whitespace-nowrap">
+          <FiUpload aria-hidden="true" /> Subir
+        </button>
         {value && <button type="button" onClick={onClear} className="min-h-11 rounded-lg px-3 text-sm text-red-500 hover:bg-red-50">Quitar</button>}
       </div>
     </div>

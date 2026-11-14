@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiSave, FiAlertCircle, FiImage } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiAlertCircle, FiFolder } from 'react-icons/fi';
 import MediaUpload from '@/admin/components/upload/MediaUpload';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import adminApi from '@/services/adminApi';
@@ -198,7 +198,7 @@ export default function EventForm() {
               ) : (
                 <div className="space-y-2">
                   <button type="button" onClick={() => setMediaPickerOpen(true)} className="btn btn-ghost text-sm w-full">
-                    <FiImage /> Elegir de biblioteca
+                    <FiFolder /> Elegir de biblioteca
                   </button>
                    <MediaUpload onUpload={(url) => setFlyerUrl(url)} showLabelInput />
                 </div>

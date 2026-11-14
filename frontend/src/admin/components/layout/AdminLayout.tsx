@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiImage, FiSettings, FiLogOut, FiInfo } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiFolder, FiSettings, FiLogOut, FiInfo } from 'react-icons/fi';
 import { useAuthStore } from '@/admin/stores/authStore';
 
 const navItems = [
   { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
   { icon: FiCalendar, label: 'Eventos', path: '/admin/dashboard/events' },
   { icon: FiFileText, label: 'Blog', path: '/admin/dashboard/blog' },
-  { icon: FiImage, label: 'Media', path: '/admin/dashboard/media' },
+  { icon: FiFolder, label: 'Media', path: '/admin/dashboard/media' },
   { icon: FiSettings, label: 'Configuración', path: '/admin/dashboard/settings' },
   { icon: FiInfo, label: 'Acerca del Sistema', path: '/admin/dashboard/system' },
 ];

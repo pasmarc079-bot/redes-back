@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FiSearch, FiX, FiImage, FiUpload } from 'react-icons/fi';
+import { FiSearch, FiX, FiImage, FiUpload, FiFolder, FiCheck } from 'react-icons/fi';
 import axios from 'axios';
 import MediaUpload from '@/admin/components/upload/MediaUpload';
 
@@ -17,6 +17,8 @@ interface MediaPickerProps {
   open: boolean;
   onClose: () => void;
   onSelect: (url: string) => void;
+  /** Opens the modal straight on the upload area, for the "Subir" action. */
+  openWithUpload?: boolean;
 }
 
 const api = axios.create({
@@ -28,12 +30,12 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProps) {
+export default function MediaPicker({ open, onClose, onSelect, openWithUpload = false }: MediaPickerProps) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
+  const [showUpload, setShowUpload] = useState(openWithUpload);
 
   const loadItems = useCallback(async (search?: string) => {
     setLoading(true);
@@ -53,8 +55,9 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
       loadItems();
       setSelectedId(null);
       setSearchQuery('');
+      setShowUpload(openWithUpload);
     }
-  }, [open, loadItems]);
+  }, [open, loadItems, openWithUpload]);
 
   const handleSearch = () => {
     loadItems(searchQuery || undefined);
@@ -85,7 +88,7 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <FiImage className="text-gold" size={20} />
+            <FiFolder className="text-gold" size={20} />
             <h2 className="font-heading text-lg font-semibold text-gray-800">Seleccionar imagen de la biblioteca</h2>
           </div>
           <button type="button" onClick={onClose} aria-label="Cerrar biblioteca" className="text-gray-400 hover:text-gray-600 p-2 min-h-11 min-w-11">
@@ -191,7 +194,7 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
               disabled={!selectedId}
               className="btn btn-primary text-sm disabled:opacity-50"
             >
-              <FiUpload size={14} />
+              <FiCheck size={14} />
               Seleccionar
             </button>
           </div>
