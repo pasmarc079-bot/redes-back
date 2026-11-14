@@ -3,6 +3,7 @@ import { FiArrowDown, FiArrowUp, FiEdit3, FiImage, FiPlus, FiSave, FiTrash2, FiX
 import { showConfirm } from '@/admin/components/ui/ConfirmModal';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import PageLinkField from '@/admin/components/ui/PageLinkField';
+import HeroSlidePreview from '@/admin/components/ui/HeroSlidePreview';
 import { SITE_PAGES } from '@/config/sitePages';
 import { showToast } from '@/admin/components/ui/Toast';
 import { siteApi } from '@/services/api';
@@ -147,6 +148,31 @@ export default function HeroSlidesSettings() {
         </p>
       </div>
 
+      <section className="card card-body border-gold/30 bg-gold/5" aria-labelledby="portada-guide-heading">
+        <h4 id="portada-guide-heading" className="font-heading text-lg font-semibold text-gray-800">Cómo funciona la portada</h4>
+        <ul className="mt-3 grid gap-3 text-sm text-gray-700 sm:grid-cols-2">
+          <li className="flex gap-2">
+            <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">1</span>
+            <span><strong className="font-semibold">El primero es el primero.</strong> Es el mensaje que ven los visitantes al entrar, antes de que empiece a cambiar solo.</span>
+          </li>
+          <li className="flex gap-2">
+            <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">2</span>
+            <span><strong className="font-semibold">Se van turnando.</strong> Abajo, en &quot;Cambio automático&quot;, decides cada cuántos segundos pasa al siguiente.</span>
+          </li>
+          <li className="flex gap-2">
+            <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">3</span>
+            <span><strong className="font-semibold">Palabras en dorado.</strong> En el mensaje principal, lo que pongas entre asteriscos se verá en dorado: <code className="rounded bg-white px-1 py-0.5 text-xs">UNA RED QUE *CRECE*</code>.</span>
+          </li>
+          <li className="flex gap-2">
+            <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">4</span>
+            <span><strong className="font-semibold">Dos imágenes.</strong> La de computadora se ve en pantallas grandes y la de celular en las pequeñas. Con una sola, se usa en las dos.</span>
+          </li>
+        </ul>
+        <p className="mt-3 text-sm text-gray-600">
+          Mientras escribes, la vista previa de cada mensaje te muestra exactamente cómo se verá en el sitio.
+        </p>
+      </section>
+
       <section className="card card-body" aria-labelledby="slides-heading">
         <div className="flex flex-col gap-4 border-b border-gray-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -249,6 +275,8 @@ export default function HeroSlidesSettings() {
               {Object.keys(errors).length > 0 && (
                 <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{Object.values(errors)[0]}</p>
               )}
+
+              <HeroSlidePreview slide={editing} />
 
               <fieldset className="space-y-4">
                 <legend className="font-heading text-sm font-semibold uppercase tracking-wider text-gold-dark">Textos</legend>

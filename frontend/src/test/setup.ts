@@ -44,3 +44,12 @@ if (typeof globalThis.DragEvent === 'undefined') {
     }
   };
 }
+
+// jsdom doesn't implement ResizeObserver — used to scale the cover preview.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  (globalThis as any).ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

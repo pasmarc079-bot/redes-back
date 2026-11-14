@@ -10,6 +10,7 @@ import EventDetail from './pages/EventDetail';
 import Community from './pages/Community';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
+import HeroPreview from './pages/HeroPreview';
 
 const AdminApp = lazy(() => import('./admin/App'));
 
@@ -25,6 +26,9 @@ function App() {
           </Suspense>
         }
       />
+
+      {/* Vista previa de la portada para el panel de administración */}
+      <Route path="/preview/hero" element={<HeroPreview />} />
 
       {/* Public Routes */}
       <Route path="/" element={<Layout />}>
