@@ -2,28 +2,26 @@ import { useEffect, useState } from 'react';
 import { FiCalendar } from 'react-icons/fi';
 import type { Event } from '@/types';
 
-const localEventImages: Record<string, string> = {
-  'exaltando-al-padre-2026': '/assets/events/exaltando.png',
-  'un-legado-de-amor-para-la-familia': '/assets/events/bautizos.png',
-};
-
 interface EventImageProps {
   event: Event;
   className: string;
 }
 
+/**
+ * The flyer comes from the event itself: the admin uploads it to the media library and that is
+ * what the site shows. If there is no flyer, or it fails to load, a calm placeholder is shown.
+ */
 export default function EventImage({ event, className }: EventImageProps) {
-  const localFallback = localEventImages[event.slug];
-  const initialSource = event.flyerUrl?.includes('dqz0z0z0z')
-    ? localFallback
-    : event.flyerUrl || localFallback;
-  const [source, setSource] = useState<string | undefined>(initialSource);
+  const flyerUrl = event.flyerUrl?.trim();
+  const [source, setSource] = useState<string | undefined>(flyerUrl || undefined);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    setSource(event.flyerUrl?.includes('dqz0z0z0z') ? localFallback : event.flyerUrl || localFallback);
-  }, [event.flyerUrl, localFallback]);
+    setSource(flyerUrl || undefined);
+    setFailed(false);
+  }, [flyerUrl]);
 
-  if (!source) {
+  if (!source || failed) {
     return <ImagePlaceholder className={className} />;
   }
 
@@ -32,13 +30,8 @@ export default function EventImage({ event, className }: EventImageProps) {
       src={source}
       alt={event.title}
       className={className}
-      onError={() => {
-        if (localFallback && source !== localFallback) {
-          setSource(localFallback);
-        } else {
-          setSource(undefined);
-        }
-      }}
+      loading="lazy"
+      onError={() => setFailed(true)}
     />
   );
 }

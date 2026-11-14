@@ -44,7 +44,7 @@ export default function EventDetail() {
 
   return (
     <div>
-      <Seo title={`${event.title} | Ministerio REDES`} description={event.shortDescription || event.description || `Conoce ${event.title}.`} image={event.flyerUrl || '/assets/events/exaltando.png'} />
+      <Seo title={`${event.title} | Ministerio REDES`} description={event.shortDescription || event.description || `Conoce ${event.title}.`} image={event.flyerUrl || undefined} />
       {/* Hero */}
       <section className="relative bg-dark py-20 md:py-28">
         <div className="container-custom">
