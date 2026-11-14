@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiFolder, FiSettings, FiLogOut, FiInfo } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiFolder, FiSettings, FiLogOut, FiInfo, FiKey } from 'react-icons/fi';
 import { useAuthStore } from '@/admin/stores/authStore';
+import ChangePasswordModal from '@/admin/components/ui/ChangePasswordModal';
 
 const navItems = [
   { icon: FiHome, label: 'Dashboard', path: '/admin/dashboard' },
@@ -17,6 +18,7 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -66,6 +68,13 @@ export default function AdminLayout() {
               <p className="text-xs text-silver truncate">{user?.email}</p>
             </div>
           </div>
+          <button
+            onClick={() => setChangingPassword(true)}
+            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-silver hover:text-gold transition-colors"
+          >
+            <FiKey size={16} />
+            Cambiar contraseña
+          </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-silver hover:text-red-400 transition-colors"
@@ -117,6 +126,13 @@ export default function AdminLayout() {
 
         <div className="p-4 border-t border-gold/20">
           <button
+            onClick={() => { setChangingPassword(true); setSidebarOpen(false); }}
+            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-silver hover:text-gold"
+          >
+            <FiKey size={16} />
+            Cambiar contraseña
+          </button>
+          <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-4 py-2 text-sm text-silver hover:text-red-400"
           >
@@ -158,6 +174,8 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+
+      <ChangePasswordModal open={changingPassword} onClose={() => setChangingPassword(false)} />
     </div>
   );
 }
