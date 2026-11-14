@@ -3,8 +3,24 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+/** Reads a secret from the environment and explains what to do when it is missing. */
+function requireEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `Falta la variable ${name}. Añádela a backend/.env (no se versiona) antes de sembrar la base de datos.`,
+    );
+  }
+  return value;
+}
+
 async function main() {
   console.log('🌱 Seeding database...');
+
+  // The passwords are never written in the repository: they come from the environment.
+  // They are checked before anything is deleted, so a missing value never leaves a half seeded database.
+  const adminPassword = requireEnv('ADMIN_PASSWORD');
+  const editorPassword = requireEnv('EDITOR_PASSWORD');
 
   await prisma.postTag.deleteMany();
   await prisma.tag.deleteMany();
@@ -19,7 +35,7 @@ async function main() {
   await prisma.pageContent.deleteMany();
   await prisma.serviceSchedule.deleteMany();
 
-  const hashedPassword = await bcrypt.hash('Excelencia079', 10);
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
   const admin = await prisma.user.create({
     data: {
       username: 'pasmarc079',
@@ -34,12 +50,12 @@ async function main() {
   });
   console.log('✅ Admin user created');
 
-  const editorPassword = await bcrypt.hash('editor123', 10);
+
   const editor = await prisma.user.create({
     data: {
       username: 'editor',
       email: 'editor@ministerioredes.com',
-      passwordHash: editorPassword,
+      passwordHash: await bcrypt.hash(editorPassword, 10),
       firstName: 'Editor',
       lastName: 'REDES',
       roles: {
