@@ -142,4 +142,16 @@ describe('MediaPicker Integration', () => {
 
     expect(mockOnClose).toHaveBeenCalled();
   });
+
+  it('permite subir una imagen sin salir del editor', async () => {
+    render(<MediaPicker open={true} onClose={mockOnClose} onSelect={mockOnSelect} />);
+
+    const uploadToggle = screen.getByRole('button', { name: /subir una imagen nueva/i });
+    expect(uploadToggle).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(uploadToggle);
+
+    expect(uploadToggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/arrastra la imagen aquí o haz clic para subir/i)).toBeInTheDocument();
+  });
 });

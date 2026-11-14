@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FiSearch, FiX, FiImage, FiUpload } from 'react-icons/fi';
 import axios from 'axios';
+import MediaUpload from '@/admin/components/upload/MediaUpload';
 
 interface MediaItem {
   id: string;
@@ -32,6 +33,7 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showUpload, setShowUpload] = useState(false);
 
   const loadItems = useCallback(async (search?: string) => {
     setLoading(true);
@@ -91,6 +93,30 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
           </button>
         </div>
 
+        {/* Subir desde aquí: evita tener que salir a la Biblioteca de Media */}
+        <div className="border-b border-gray-100 px-6 py-3">
+          <button
+            type="button"
+            onClick={() => setShowUpload((value) => !value)}
+            aria-expanded={showUpload}
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 text-sm font-medium text-gray-700 transition-colors hover:border-gold hover:bg-gold/5 hover:text-gray-900"
+          >
+            <FiUpload aria-hidden="true" />
+            {showUpload ? 'Cerrar la subida' : 'Subir una imagen nueva'}
+          </button>
+          {showUpload && (
+            <div className="mt-3">
+              <MediaUpload
+                label="Arrastra la imagen aquí o haz clic para subir"
+                onUpload={(url) => {
+                  onSelect(url);
+                  onClose();
+                }}
+              />
+            </div>
+          )}
+        </div>
+
         {/* Search */}
         <div className="px-6 py-3 border-b border-gray-100">
           <div className="flex gap-2">
@@ -120,7 +146,7 @@ export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProp
             <div className="text-center py-12 text-gray-400">
               <FiImage className="mx-auto text-4xl mb-3 text-gray-300" />
               <p>No hay imágenes en la biblioteca.</p>
-              <p className="text-sm mt-1">Sube imágenes primero en la Biblioteca de Media.</p>
+              <p className="text-sm mt-1">Sube una imagen desde arriba o agrégala en la sección Media.</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
