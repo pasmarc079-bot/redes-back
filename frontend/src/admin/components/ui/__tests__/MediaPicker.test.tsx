@@ -143,22 +143,17 @@ describe('MediaPicker Integration', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('permite subir una imagen sin salir del editor', async () => {
+  it('ofrece subir una imagen al final del modal', async () => {
     render(<MediaPicker open={true} onClose={mockOnClose} onSelect={mockOnSelect} />);
 
-    const uploadToggle = screen.getByRole('button', { name: /subir una imagen nueva/i });
-    expect(uploadToggle).toHaveAttribute('aria-expanded', 'false');
-
-    await userEvent.click(uploadToggle);
-
-    expect(uploadToggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText(/arrastra la imagen aquí o haz clic para subir/i)).toBeInTheDocument();
+    expect(screen.getByText(/subir nueva imagen o arrastra aquí/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cerrar la subida/i })).not.toBeInTheDocument();
   });
 
-  it('abre la zona de subida cuando se pide con openWithUpload', async () => {
-    render(<MediaPicker open={true} onClose={mockOnClose} onSelect={mockOnSelect} openWithUpload />);
+  it('ofrece subir una imagen al final del modal', async () => {
+    render(<MediaPicker open={true} onClose={mockOnClose} onSelect={mockOnSelect} />);
 
-    expect(screen.getByText(/arrastra la imagen aquí o haz clic para subir/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /cerrar la subida/i })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText(/subir nueva imagen o arrastra aquí/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /cerrar la subida/i })).not.toBeInTheDocument();
   });
 });

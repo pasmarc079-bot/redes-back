@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FiSearch, FiX, FiImage, FiUpload, FiFolder, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiX, FiImage, FiFolder, FiCheck } from 'react-icons/fi';
 import axios from 'axios';
 import MediaUpload from '@/admin/components/upload/MediaUpload';
 
@@ -17,8 +17,6 @@ interface MediaPickerProps {
   open: boolean;
   onClose: () => void;
   onSelect: (url: string) => void;
-  /** Opens the modal straight on the upload area, for the "Subir" action. */
-  openWithUpload?: boolean;
 }
 
 const api = axios.create({
@@ -30,12 +28,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export default function MediaPicker({ open, onClose, onSelect, openWithUpload = false }: MediaPickerProps) {
+export default function MediaPicker({ open, onClose, onSelect }: MediaPickerProps) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(openWithUpload);
 
   const loadItems = useCallback(async (search?: string) => {
     setLoading(true);
@@ -55,9 +52,8 @@ export default function MediaPicker({ open, onClose, onSelect, openWithUpload = 
       loadItems();
       setSelectedId(null);
       setSearchQuery('');
-      setShowUpload(openWithUpload);
     }
-  }, [open, loadItems, openWithUpload]);
+  }, [open, loadItems]);
 
   const handleSearch = () => {
     loadItems(searchQuery || undefined);
@@ -96,30 +92,6 @@ export default function MediaPicker({ open, onClose, onSelect, openWithUpload = 
           </button>
         </div>
 
-        {/* Subir desde aquí: evita tener que salir a la Biblioteca de Media */}
-        <div className="border-b border-gray-100 px-6 py-3">
-          <button
-            type="button"
-            onClick={() => setShowUpload((value) => !value)}
-            aria-expanded={showUpload}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 text-sm font-medium text-gray-700 transition-colors hover:border-gold hover:bg-gold/5 hover:text-gray-900"
-          >
-            <FiUpload aria-hidden="true" />
-            {showUpload ? 'Cerrar la subida' : 'Subir una imagen nueva'}
-          </button>
-          {showUpload && (
-            <div className="mt-3">
-              <MediaUpload
-                label="Arrastra la imagen aquí o haz clic para subir"
-                onUpload={(url) => {
-                  onSelect(url);
-                  onClose();
-                }}
-              />
-            </div>
-          )}
-        </div>
-
         {/* Search */}
         <div className="px-6 py-3 border-b border-gray-100">
           <div className="flex gap-2">
@@ -149,7 +121,7 @@ export default function MediaPicker({ open, onClose, onSelect, openWithUpload = 
             <div className="text-center py-12 text-gray-400">
               <FiImage className="mx-auto text-4xl mb-3 text-gray-300" />
               <p>No hay imágenes en la biblioteca.</p>
-              <p className="text-sm mt-1">Sube una imagen desde arriba o agrégala en la sección Media.</p>
+              <p className="text-sm mt-1">Sube una imagen con la opción de abajo o agrégala en la sección Media.</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
@@ -198,6 +170,18 @@ export default function MediaPicker({ open, onClose, onSelect, openWithUpload = 
               Seleccionar
             </button>
           </div>
+        </div>
+
+        {/* Subir una imagen: al final del modal, siempre visible. Un clic abre el archivo. */}
+        <div className="border-t border-gray-200 bg-gray-50/70 px-6 py-4">
+          <MediaUpload
+            compact
+            label="Subir nueva imagen o arrastra aquí"
+            onUpload={(url) => {
+              onSelect(url);
+              onClose();
+            }}
+          />
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FiArrowDown, FiArrowUp, FiEdit3, FiFolder, FiPlus, FiSave, FiTrash2, FiUpload, FiX } from 'react-icons/fi';
 import { showConfirm } from '@/admin/components/ui/ConfirmModal';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
+import { uploadMediaFile } from '@/admin/utils/uploadMedia';
 import PageLinkField from '@/admin/components/ui/PageLinkField';
 import HeroSlidePreview from '@/admin/components/ui/HeroSlidePreview';
 import { SITE_PAGES } from '@/config/sitePages';
@@ -36,8 +37,7 @@ export default function HeroSlidesSettings() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [picker, setPicker] = useState<ImageTarget | null>(null);
-  // 'library' opens the media library, 'upload' opens it straight on the upload area.
-  const [pickerMode, setPickerMode] = useState<'library' | 'upload'>('library');
+  const [uploading, setUploading] = useState(false);
   const [intervalSeconds, setIntervalSeconds] = useState(6);
   const [savingInterval, setSavingInterval] = useState(false);
 
@@ -103,6 +103,19 @@ export default function HeroSlidesSettings() {
     });
     if (!confirmed) return;
     await persist(slides.filter((_, i) => i !== index));
+  };
+
+  const uploadFor = async (target: ImageTarget, file: File) => {
+    setUploading(true);
+    try {
+      const media = await uploadMediaFile(file);
+      setEditing((current) => (current ? { ...current, [target]: media.url } : current));
+      showToast('success', 'Imagen subida. No olvides guardar el mensaje.');
+    } catch {
+      showToast('error', 'No se pudo subir la imagen. Intenta de nuevo.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const openEditor = (slide: HeroSlide | null, index: number | null) => {
@@ -349,15 +362,15 @@ export default function HeroSlidesSettings() {
                   <ImageField
                     label="Computadora"
                     value={editing.imageUrl}
-                    onPick={() => { setPickerMode('library'); setPicker('imageUrl'); }}
-                    onUpload={() => { setPickerMode('upload'); setPicker('imageUrl'); }}
+                    onPick={() => setPicker('imageUrl')}
+                    onUpload={(file) => { void uploadFor('imageUrl', file); }}
                     onClear={() => setEditing({ ...editing, imageUrl: '' })}
                   />
                   <ImageField
                     label="Celular"
                     value={editing.mobileImageUrl}
-                    onPick={() => { setPickerMode('library'); setPicker('mobileImageUrl'); }}
-                    onUpload={() => { setPickerMode('upload'); setPicker('mobileImageUrl'); }}
+                    onPick={() => setPicker('mobileImageUrl')}
+                    onUpload={(file) => { void uploadFor('mobileImageUrl', file); }}
                     onClear={() => setEditing({ ...editing, mobileImageUrl: '' })}
                   />
                 </div>
@@ -374,7 +387,6 @@ export default function HeroSlidesSettings() {
 
       <MediaPicker
         open={picker !== null}
-        openWithUpload={pickerMode === 'upload'}
         onClose={() => setPicker(null)}
         onSelect={(url) => {
           if (picker && editing) setEditing({ ...editing, [picker]: url });
@@ -395,9 +407,11 @@ function ImageField({
   label: string;
   value: string;
   onPick: () => void;
-  onUpload: () => void;
+  onUpload: (file: File) => void;
   onClear: () => void;
 }) {
+  const fileInput = useRef<HTMLInputElement>(null);
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-gray-700">{label}</p>
@@ -408,11 +422,24 @@ function ImageField({
         <button type="button" onClick={onPick} className="btn btn-secondary flex-1 whitespace-nowrap">
           <FiFolder aria-hidden="true" /> {value ? 'Cambiar' : 'Elegir'}
         </button>
-        <button type="button" onClick={onUpload} className="btn btn-secondary flex-1 whitespace-nowrap">
+        <button type="button" onClick={() => fileInput.current?.click()} className="btn btn-secondary flex-1 whitespace-nowrap">
           <FiUpload aria-hidden="true" /> Subir
         </button>
         {value && <button type="button" onClick={onClear} className="min-h-11 rounded-lg px-3 text-sm text-red-500 hover:bg-red-50">Quitar</button>}
       </div>
+      {/* A direct upload: one click opens the file picker, no extra steps. */}
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        aria-label={`Subir imagen de ${label.toLowerCase()}`}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) onUpload(file);
+          event.target.value = '';
+        }}
+      />
     </div>
   );
 }

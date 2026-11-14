@@ -1,21 +1,19 @@
 import { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FiUpload, FiX, FiImage, FiCheck } from 'react-icons/fi';
-import axios from 'axios';
 import { showToast } from '@/admin/components/ui/Toast';
+import { uploadMediaFile } from '@/admin/utils/uploadMedia';
 
 interface MediaUploadProps {
   onUpload: (url: string, media?: { id: string; label: string | null }) => void;
   accept?: Record<string, string[]>;
   label?: string;
   showLabelInput?: boolean;
+  /** One-line version, for places where the upload is a secondary option. */
+  compact?: boolean;
 }
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_ADMIN_API_BASE_URL || '/api/v1',
-});
-
-export default function MediaUpload({ onUpload, accept, label, showLabelInput = false }: MediaUploadProps) {
+export default function MediaUpload({ onUpload, accept, label, showLabelInput = false, compact = false }: MediaUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [mediaLabel, setMediaLabel] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -29,16 +27,8 @@ export default function MediaUpload({ onUpload, accept, label, showLabelInput = 
 
     setUploading(true);
     try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      formData.append('file', file);
-      if (showLabelInput) {
-        formData.append('label', mediaLabel.trim());
-      }
-      const res = await api.post('/admin/media/upload', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      onUpload(res.data.originalUrl, { id: res.data.id, label: res.data.label });
+      const media = await uploadMediaFile(file, showLabelInput ? mediaLabel.trim() : undefined);
+      onUpload(media.url, { id: media.id, label: media.label });
       resetState();
     } catch {
       showToast('error', 'Error al subir la imagen. Intenta de nuevo.');
@@ -86,6 +76,34 @@ export default function MediaUpload({ onUpload, accept, label, showLabelInput = 
 
   const canUpload = showLabelInput ? !!selectedFile && !!mediaLabel.trim() : !!selectedFile;
   if (!showLabelInput) {
+    if (compact) {
+      return (
+        <div
+          {...getRootProps()}
+          className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-3 text-sm transition-colors ${
+            isDragActive
+              ? 'border-gold bg-gold/5'
+              : 'border-gray-300 hover:border-gold hover:bg-gold/5'
+          } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
+        >
+          <input {...getInputProps()} />
+          {uploading ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+              <span className="text-gray-600">Subiendo a Cloudinary...</span>
+            </>
+          ) : (
+            <>
+              <FiUpload className="shrink-0 text-gray-400" size={16} aria-hidden="true" />
+              <span className="font-medium text-gray-700">
+                {isDragActive ? 'Suelta la imagen aquí' : label || 'Subir nueva imagen o arrastra aquí'}
+              </span>
+            </>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div>
         <div
