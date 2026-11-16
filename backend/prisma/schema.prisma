@@ -260,3 +260,16 @@ model TestimonialVideo {
   @@map("testimonial_videos")
 }
 
+/// Messages sent through the public contact form. They are stored first and emailed afterwards,
+/// so a mail server failure never loses a message from a visitor.
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(120)
+  email     String   @db.VarChar(200)
+  message   String   @db.Text
+  status    String   @default("received") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  @@map("contact_messages")
+}

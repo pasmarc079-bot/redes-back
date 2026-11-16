@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiFolder, FiSettings, FiLogOut, FiInfo, FiKey } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiCalendar, FiFileText, FiFolder, FiSettings, FiLogOut, FiInfo, FiKey, FiMail } from 'react-icons/fi';
 import { useAuthStore } from '@/admin/stores/authStore';
 import ChangePasswordModal from '@/admin/components/ui/ChangePasswordModal';
 
@@ -10,6 +10,7 @@ const navItems = [
   { icon: FiFileText, label: 'Blog', path: '/admin/dashboard/blog' },
   { icon: FiFolder, label: 'Media', path: '/admin/dashboard/media' },
   { icon: FiSettings, label: 'Configuración', path: '/admin/dashboard/settings' },
+  { icon: FiMail, label: 'Mensajes', path: '/admin/dashboard/contact' },
   { icon: FiInfo, label: 'Acerca del Sistema', path: '/admin/dashboard/system' },
 ];
 

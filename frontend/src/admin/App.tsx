@@ -13,6 +13,7 @@ const PostList = lazy(() => import('@/admin/pages/blog/PostList'));
 const PostEditor = lazy(() => import('@/admin/pages/blog/PostEditor'));
 const MediaLibrary = lazy(() => import('@/admin/pages/media/MediaLibrary'));
 const Settings = lazy(() => import('@/admin/pages/settings/Settings'));
+const ContactMessages = lazy(() => import('@/admin/pages/contact/ContactMessages'));
 const SystemInfo = lazy(() => import('@/admin/pages/SystemInfo'));
 
 export default function AdminApp() {
@@ -46,6 +47,7 @@ export default function AdminApp() {
 
         {/* Media */}
         <Route path="media" element={<MediaLibrary />} />
+        <Route path="contact" element={<ContactMessages />} />
 
         <Route path="settings" element={<Settings />} />
 

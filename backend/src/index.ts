@@ -16,6 +16,7 @@ import mediaRoutes from './routes/media.routes';
 import socialRoutes from './routes/social.routes';
 import siteRoutes from './routes/site.routes';
 import contactRoutes from './routes/contact.routes';
+import contactMessageRoutes from './routes/contactMessage.routes';
 import testimonialRoutes from './routes/testimonial.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
@@ -61,6 +62,7 @@ app.use('/api/v1/admin/media', mediaRoutes);
 app.use('/api/v1/social', socialRoutes);
 app.use('/api/v1/site', siteRoutes);
 app.use('/api/v1/contact', contactRoutes);
+app.use('/api/v1/admin/contact-messages', contactMessageRoutes);
 app.use('/api/v1/testimonials', testimonialRoutes);
 
 // Admin routes (protected)

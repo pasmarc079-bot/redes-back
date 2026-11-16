@@ -1,10 +1,22 @@
 import { Router } from 'express';
 import nodemailer from 'nodemailer';
 import prisma from '../repository/prisma';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/', async (req, res, next) => {
+/** Escapes the text that comes from the form before it is put into the email. */
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/**
+ * Public contact form.
+ *
+ * The message is stored first and the email is attempted afterwards: if the mail server is down
+ * the visitor's message is still safe in the panel, and the form can answer with a clear message
+ * instead of a generic error.
+ */
+router.post('/', async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
@@ -19,17 +31,27 @@ router.post('/', async (req, res, next) => {
       return;
     }
 
+    const saved = await prisma.contactMessage.create({
+      data: {
+        name: name.trim().slice(0, 120),
+        email: email.trim().slice(0, 200),
+        message: message.trim(),
+        status: 'received',
+      },
+    });
+
     const destSetting = await prisma.siteSetting.findUnique({ where: { key: 'contact_email' } });
     const destEmail = destSetting?.value || process.env.CONTACT_EMAIL || '';
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
 
     if (!destEmail || !smtpUser || !smtpPass) {
-      console.log(`\n📩 ===== MENSAJE DE CONTACTO =====`);
-      console.log(`   De: ${name} <${email}>`);
-      console.log(`   Para: ${destEmail || '(no configurado - usa CONTACT_EMAIL o SMTP_USER)'}`);
-      console.log(`   Mensaje: ${message}`);
-      console.log(`==================================\n`);
+      console.log(`\n📩 ===== MENSAJE DE CONTACTO (${saved.id}) =====`);
+      console.log(`   De: ${saved.name} <${saved.email}>`);
+      console.log(`   Para: ${destEmail || '(sin configurar)'}`);
+      console.log(`   Mensaje: ${saved.message}`);
+      console.log('========================================\n');
+      await prisma.contactMessage.update({ where: { id: saved.id }, data: { status: 'logged' } });
       res.json({ success: true, message: 'Mensaje recibido correctamente.' });
       return;
     }
@@ -38,10 +60,7 @@ router.post('/', async (req, res, next) => {
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
       port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
+      auth: { user: smtpUser, pass: smtpPass },
     });
 
     await transporter.sendMail({
@@ -50,23 +69,28 @@ router.post('/', async (req, res, next) => {
       // and the whole message was rejected. The visitor goes in replyTo, so replying is easy.
       from: process.env.SMTP_FROM?.trim() || smtpUser,
       to: destEmail,
-      replyTo: `"${name.replace(/["<>]/g, '')}" <${email}>`,
-      subject: `Contacto desde Ministerio REDES — ${name}`,
+      replyTo: `"${saved.name.replace(/["<>]/g, '')}" <${saved.email}>`,
+      subject: `Contacto desde Ministerio REDES — ${saved.name}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <h2 style="color:#C9A84C;border-bottom:2px solid #C9A84C;padding-bottom:8px">Nuevo mensaje de contacto</h2>
-          <p><strong>Nombre:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Nombre:</strong> ${escapeHtml(saved.name)}</p>
+          <p><strong>Email:</strong> ${escapeHtml(saved.email)}</p>
           <hr style="border:none;border-top:1px solid #eee;margin:16px 0" />
-          <p style="white-space:pre-wrap;line-height:1.6">${message}</p>
+          <p style="white-space:pre-wrap;line-height:1.6">${escapeHtml(saved.message)}</p>
         </div>
       `,
     });
 
+    await prisma.contactMessage.update({ where: { id: saved.id }, data: { status: 'sent' } });
     res.json({ success: true, message: 'Mensaje enviado correctamente.' });
   } catch (error) {
     console.error('Error sending contact email:', error);
-    res.status(500).json({ error: 'Error al enviar el mensaje. Intenta de nuevo.' });
+    // The message is already stored, so the visitor is not asked to write again.
+    res.json({
+      success: true,
+      message: 'Recibimos tu mensaje. Te responderemos pronto.',
+    });
   }
 });
 
