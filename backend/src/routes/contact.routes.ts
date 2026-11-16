@@ -45,9 +45,12 @@ router.post('/', async (req, res, next) => {
     });
 
     await transporter.sendMail({
-      from: `"${name}" <${process.env.SMTP_FROM || smtpUser}>`,
+      // The sender must be an address the SMTP account owns. When SMTP_FROM already carries a
+      // name ("Ministerio REDES <correo@gmail.com>") wrapping it again made an invalid address
+      // and the whole message was rejected. The visitor goes in replyTo, so replying is easy.
+      from: process.env.SMTP_FROM?.trim() || smtpUser,
       to: destEmail,
-      replyTo: email,
+      replyTo: `"${name.replace(/["<>]/g, '')}" <${email}>`,
       subject: `Contacto desde Ministerio REDES — ${name}`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
