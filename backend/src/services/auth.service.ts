@@ -2,22 +2,19 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../repository/prisma';
 import { AppError } from '../middleware/errorHandler';
+import { isJwtSecretSecure } from '../utils/jwtSecret';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '86400000';
 
-/** Secrets that must never reach production: with them anyone can forge an admin token. */
-const WEAK_SECRETS = ['dev-secret-change-in-production', 'REDES_CHANGE_ME', 'CHANGE_ME', 'secret', 'redes'];
 
-export const isJwtSecretSecure = (): boolean =>
-  !WEAK_SECRETS.includes(JWT_SECRET) && JWT_SECRET.length >= 32;
 
 /**
  * Refuses to sign tokens while the secret is weak. The public site keeps working, but nobody
  * can sign in until the server is configured properly.
  */
 const assertSecureSecret = () => {
-  if (process.env.NODE_ENV === 'production' && !isJwtSecretSecure()) {
+  if (process.env.NODE_ENV === 'production' && !isJwtSecretSecure(JWT_SECRET)) {
     throw new AppError(
       'El servidor no está configurado de forma segura: define JWT_SECRET con un valor aleatorio de 32 caracteres o más en las variables de entorno.',
       503,
