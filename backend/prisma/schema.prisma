@@ -268,6 +268,7 @@ model ContactMessage {
   email     String   @db.VarChar(200)
   message   String   @db.Text
   status    String   @default("received") @db.VarChar(20)
+  error     String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   readAt    DateTime? @map("read_at")
 

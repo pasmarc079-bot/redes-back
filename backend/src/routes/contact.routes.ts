@@ -17,6 +17,9 @@ const escapeHtml = (value: string) =>
  * instead of a generic error.
  */
 router.post('/', async (req, res) => {
+  // Kept outside the try so the catch can record what happened with the saved message.
+  let saved: { id: string; name: string; email: string; message: string } | null = null;
+
   try {
     const { name, email, message } = req.body;
 
@@ -31,7 +34,7 @@ router.post('/', async (req, res) => {
       return;
     }
 
-    const saved = await prisma.contactMessage.create({
+    saved = await prisma.contactMessage.create({
       data: {
         name: name.trim().slice(0, 120),
         email: email.trim().slice(0, 200),
@@ -84,9 +87,19 @@ router.post('/', async (req, res) => {
 
     await prisma.contactMessage.update({ where: { id: saved.id }, data: { status: 'sent' } });
     res.json({ success: true, message: 'Mensaje enviado correctamente.' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending contact email:', error);
-    // The message is already stored, so the visitor is not asked to write again.
+    // The message is already stored, so the visitor is not asked to write again. The reason is
+    // kept with the message so the panel can explain what happened with the email.
+    const reason = [error?.code, error?.responseCode, error?.message].filter(Boolean).join(' · ');
+    if (saved) {
+      await prisma.contactMessage
+        .updateMany({
+          where: { id: saved.id },
+          data: { status: 'failed', error: reason.slice(0, 500) },
+        })
+        .catch(() => undefined);
+    }
     res.json({
       success: true,
       message: 'Recibimos tu mensaje. Te responderemos pronto.',

@@ -10,12 +10,14 @@ interface ContactMessage {
   email: string;
   message: string;
   status: string;
+  error: string | null;
   createdAt: string;
   readAt: string | null;
 }
 
 const STATUS_LABEL: Record<string, { text: string; className: string }> = {
   received: { text: 'Sin correo enviado', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+  failed: { text: 'Falló el envío del correo', className: 'bg-red-50 text-red-700 border-red-200' },
   logged: { text: 'Registrado', className: 'bg-gray-100 text-gray-700 border-gray-200' },
   sent: { text: 'Enviado por correo', className: 'bg-green-50 text-green-700 border-green-200' },
 };
@@ -105,6 +107,11 @@ export default function ContactMessages() {
                       {message.email}
                     </a>
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{message.message}</p>
+                    {message.error && (
+                      <p className="mt-2 break-words rounded-lg bg-gray-50 px-2.5 py-1.5 text-xs text-gray-500">
+                        <span className="font-medium text-gray-600">Motivo:</span> {message.error}
+                      </p>
+                    )}
                   </div>
                   <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
                     <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${status.className}`}>
