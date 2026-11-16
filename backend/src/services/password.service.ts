@@ -22,6 +22,20 @@ const assertSecureSecret = () => {
 
 const MIN_PASSWORD_LENGTH = 10;
 
+/**
+ * Passwords that were published in the public repository. They must never be set again, and the
+ * panel says so instead of accepting them.
+ */
+const KNOWN_LEAKED_PASSWORDS = [
+  'excelencia079',
+  'editor123',
+  'admin123',
+  'password',
+  '123456',
+  '12345678',
+  'redes',
+];
+
 export interface PasswordInput {
   currentPassword: string;
   newPassword: string;
@@ -30,6 +44,12 @@ export interface PasswordInput {
 const assertStrongEnough = (password: string) => {
   if (!password || password.length < MIN_PASSWORD_LENGTH) {
     throw new AppError(`La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`, 400);
+  }
+  if (KNOWN_LEAKED_PASSWORDS.includes(password.toLowerCase())) {
+    throw new AppError(
+      'Esa contraseña es conocida: estuvo publicada en el repositorio. Elige otra que nadie más pueda leer.',
+      400,
+    );
   }
 };
 
