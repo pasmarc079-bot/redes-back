@@ -404,7 +404,7 @@ export default function HeroSlidesSettings() {
                   </div>
                   <div className="mt-1 flex justify-between text-xs text-gray-400">
                     <span>0%: foto clara</span>
-                    <span>100%: como ahora</span>
+                    <span>100%: foto oscura</span>
                   </div>
                   {editing.overlayOpacity < 40 && (
                     <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
