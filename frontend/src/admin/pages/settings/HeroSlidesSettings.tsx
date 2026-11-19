@@ -24,6 +24,7 @@ const emptySlide = (): HeroSlide => ({
   secondaryCtaUrl: '',
   imageUrl: '',
   mobileImageUrl: '',
+  overlayOpacity: 100,
 });
 
 const TITLE_HELP = 'Escribe aquí el mensaje principal de la portada. Si quieres destacar una palabra, ponla entre asteriscos y se mostrará en dorado. Ejemplo: nos une *en familia*';
@@ -182,6 +183,10 @@ export default function HeroSlidesSettings() {
             <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">4</span>
             <span><strong className="font-semibold">Dos imágenes.</strong> La de computadora se ve en pantallas grandes y la de celular en las pequeñas. Con una sola, se usa en las dos.</span>
           </li>
+          <li className="flex gap-2">
+            <span aria-hidden="true" className="mt-0.5 font-heading text-gold-dark">5</span>
+            <span><strong className="font-semibold">La oscuridad de la foto.</strong> Cada mensaje tiene su propio control de oscuridad, dentro de &quot;Imágenes&quot;. Así el texto se lee bien aunque la foto sea clara.</span>
+          </li>
         </ul>
         <p className="mt-3 text-sm text-gray-600">
           Mientras escribes, la vista previa de cada mensaje te muestra exactamente cómo se verá en el sitio.
@@ -225,6 +230,7 @@ export default function HeroSlidesSettings() {
                   <p className="truncate text-sm text-gray-500">
                     {slide.secondaryCtaLabel ? `Segundo botón: ${slide.secondaryCtaLabel} → ${destinationLabel(slide.secondaryCtaUrl)}` : 'Sin segundo botón'}
                   </p>
+                  <p className="truncate text-sm text-gray-500">Oscuridad de la imagen: {slide.overlayOpacity}%</p>
                 </div>
                 <div className="flex items-center justify-end gap-2">
                   <button type="button" onClick={() => openEditor(slide, index)} disabled={saving} className="btn btn-secondary whitespace-nowrap"><FiEdit3 aria-hidden="true" /> Editar</button>
@@ -373,6 +379,38 @@ export default function HeroSlidesSettings() {
                     onUpload={(file) => { void uploadFor('mobileImageUrl', file); }}
                     onClear={() => setEditing({ ...editing, mobileImageUrl: '' })}
                   />
+                </div>
+
+                <div className="field-group border-t border-gray-100 pt-4">
+                  <label className="label" htmlFor="hero-overlay">Oscuridad sobre la imagen</label>
+                  <p id="hero-overlay-help" className="mb-3 text-xs text-gray-500">
+                    Qué tanto se oscurece la foto detrás del texto. Al 100% se ve como el sitio hasta hoy; si la bajas, la foto se ve más clara y luminosa.
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <input
+                      id="hero-overlay"
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={editing.overlayOpacity}
+                      onChange={(e) => setEditing({ ...editing, overlayOpacity: Number(e.target.value) })}
+                      aria-describedby="hero-overlay-help"
+                      className="h-2 flex-1 cursor-pointer accent-gold"
+                    />
+                    <output htmlFor="hero-overlay" className="w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-gray-700">
+                      {editing.overlayOpacity}%
+                    </output>
+                  </div>
+                  <div className="mt-1 flex justify-between text-xs text-gray-400">
+                    <span>0%: foto clara</span>
+                    <span>100%: como ahora</span>
+                  </div>
+                  {editing.overlayOpacity < 40 && (
+                    <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      Con esta oscuridad el texto puede costar leer sobre fotos claras. Revisa la vista previa de arriba antes de guardar.
+                    </p>
+                  )}
                 </div>
               </fieldset>
 

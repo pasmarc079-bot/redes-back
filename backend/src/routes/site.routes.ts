@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import prisma from '../repository/prisma';
 import { authenticate, authorize } from '../middleware/auth';
+import { parseSiteSettingsUpdate, SITE_SETTING_META } from '../utils/siteSettingsUpdate';
 
 const router = Router();
 
@@ -17,11 +18,21 @@ router.get('/settings/full', async (_req, res) => {
 });
 
 router.put('/settings', authenticate, authorize('ADMIN'), async (req, res) => {
-  const updates = req.body as Record<string, string>;
+  const parsed = parseSiteSettingsUpdate(req.body);
+  if (parsed.error || !parsed.values) {
+    return res.status(400).json({ error: parsed.error ?? 'Los datos enviados no son válidos.' });
+  }
+
   await prisma.$transaction(
-    Object.entries(updates).map(([key, value]) =>
-      prisma.siteSetting.update({ where: { key }, data: { value } })
-    )
+    Object.entries(parsed.values).map(([key, value]) => {
+      const meta = SITE_SETTING_META[key];
+      // Upsert so a setting that is missing in an older database is created instead of failing.
+      return prisma.siteSetting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value, label: meta.label, group: meta.group, type: meta.type },
+      });
+    })
   );
   res.json({ success: true });
 });

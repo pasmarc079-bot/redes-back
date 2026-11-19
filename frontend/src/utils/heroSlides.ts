@@ -12,6 +12,8 @@ export interface HeroSlide {
   secondaryCtaUrl: string;
   imageUrl: string;
   mobileImageUrl: string;
+  /** How dark the veil over the photo is, in percent. 100 is the original look. */
+  overlayOpacity: number;
 }
 
 export const MAX_HERO_SLIDES = 5;
@@ -51,6 +53,7 @@ export function parseHeroSlides(raw?: string | null): HeroSlide[] {
       secondaryCtaUrl: safeHref(text(record.secondaryCtaUrl, 500)),
       imageUrl: safeHref(text(record.imageUrl, 1000)),
       mobileImageUrl: safeHref(text(record.mobileImageUrl, 1000)),
+      overlayOpacity: parseOverlayOpacity(record.overlayOpacity),
     }];
   });
 }
@@ -90,7 +93,21 @@ export function resolveHeroSlides(
     secondaryCtaUrl: '/nosotros',
     imageUrl: safeHref(settings.hero_image_url || ''),
     mobileImageUrl: safeHref(settings.hero_image_mobile_url || ''),
+    overlayOpacity: DEFAULT_HERO_OVERLAY_OPACITY,
   }];
+}
+
+export const DEFAULT_HERO_OVERLAY_OPACITY = 100;
+
+/**
+ * Percent of darkness over the photo, kept between 0 and 100. Slides saved before this option
+ * existed have no value and keep the original look, so nothing changes until someone moves the slider.
+ */
+export function parseOverlayOpacity(value: unknown): number {
+  if (value === undefined || value === null || value === '') return DEFAULT_HERO_OVERLAY_OPACITY;
+  const parsed = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(parsed)) return DEFAULT_HERO_OVERLAY_OPACITY;
+  return Math.min(100, Math.max(0, Math.round(parsed)));
 }
 
 export const DEFAULT_HERO_INTERVAL_SECONDS = 6;

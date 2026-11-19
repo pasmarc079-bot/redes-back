@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
-import { splitAccent, type HeroSlide } from '@/utils/heroSlides';
+import { parseOverlayOpacity, splitAccent, type HeroSlide } from '@/utils/heroSlides';
 
 const isExternal = (href: string) => /^https?:\/\//i.test(href);
 
@@ -37,6 +37,8 @@ interface HeroSlideViewProps {
  */
 export default function HeroSlideView({ slide, active, primary, logoUrl, staticButtons = false }: HeroSlideViewProps) {
   const Heading = primary ? 'h1' : 'h2';
+  // The two darkening layers share one opacity so the admin slider controls them together.
+  const veilOpacity = parseOverlayOpacity(slide.overlayOpacity) / 100;
 
   const renderLink = (label: string, href: string, className: string) => {
     const content = (
@@ -70,8 +72,10 @@ export default function HeroSlideView({ slide, active, primary, logoUrl, staticB
     <div className="relative h-full w-full bg-dark">
       <HeroBackdrop desktop={slide.imageUrl} mobile={slide.mobileImageUrl} active={active} eager={primary} />
       {/* Even veil, because the text is centred: a side gradient would leave one edge unreadable. */}
-      <div className="absolute inset-0 bg-dark/45" aria-hidden="true" />
-      <div className="hero-veil absolute inset-0" aria-hidden="true" />
+      <div className="absolute inset-0" style={{ opacity: veilOpacity }} aria-hidden="true">
+        <div className="absolute inset-0 bg-dark/45" />
+        <div className="hero-veil absolute inset-0" />
+      </div>
       <div className="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-dark/30" aria-hidden="true" />
 
       <div className="container-custom relative flex h-full flex-col items-center justify-center gap-6 pb-[clamp(5.5rem,12vh,6rem)] pt-[clamp(4rem,9vh,8rem)] text-center">

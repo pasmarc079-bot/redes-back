@@ -7,6 +7,7 @@ import { normalizeWhatsAppNumber, isValidWhatsAppNumber, formatWhatsAppNumber } 
 import TestimoniesSettings from './TestimoniesSettings';
 import HeroSlidesSettings from './HeroSlidesSettings';
 import { getSitePage, type SitePageId } from '@/config/sitePages';
+import { parseHeroSlides } from '@/utils/heroSlides';
 
 type PageId = SitePageId;
 type FieldSource = 'content' | 'setting';
@@ -128,6 +129,15 @@ const pages: PageDefinition[] = [
 
 const pageById = Object.fromEntries(pages.map(page => [page.id, page])) as Record<PageId, PageDefinition>;
 
+/** Cover fields kept for older setups. They are ignored while the cover has messages of its own. */
+const LEGACY_HERO_FIELD_KEYS = new Set([
+  'hero_title',
+  'hero_subtitle',
+  'hero_tagline',
+  'hero_image_url',
+  'hero_image_mobile_url',
+]);
+
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSetting[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -167,6 +177,8 @@ export default function Settings() {
 
   const getSetting = (key: string) => settings.find(item => item.key === key)?.value || '';
   const getContent = (key: string) => contents.find(item => item.key === key);
+  const heroSlidesCount = parseHeroSlides(getSetting('hero_slides')).length;
+  const hasHeroSlides = heroSlidesCount > 0;
   const getFieldValue = (field: PageField) => field.source === 'setting'
     ? getSetting(field.key)
     : getContent(field.key)?.body || '';
@@ -353,6 +365,11 @@ export default function Settings() {
                   <div className="flex items-center gap-3">
                     <h5 className="font-heading font-semibold text-gray-800">{page.label}</h5>
                     <span className="hidden text-xs text-gray-400 sm:inline">Página fija</span>
+                    {page.id === 'home' && hasHeroSlides && (
+                      <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gold-dark">
+                        Portada con mensajes
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm text-gray-500">{page.description}</p>
                 </div>
@@ -392,9 +409,35 @@ export default function Settings() {
               <button type="button" onClick={() => setSelectedPage(null)} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} /></button>
             </div>
             <div className="space-y-5 px-5 py-6 sm:px-7">
+              {hasHeroSlides && selectedDefinition.id === 'home' && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="flex items-start gap-2 text-sm font-semibold text-amber-900">
+                    <FiAlertCircle className="mt-0.5 shrink-0" aria-hidden="true" />
+                    Estos campos de portada no se están mostrando en el sitio
+                  </p>
+                  <p className="mt-2 text-sm text-amber-900/90">
+                    El inicio usa hoy los {heroSlidesCount} {heroSlidesCount === 1 ? 'mensaje' : 'mensajes'} de la portada que configuraste en la pestaña <strong>Portada</strong>. Mientras existan, el título, el subtítulo, el eslogan y las imágenes de esta pantalla se ignoran. Si quitas todos esos mensajes, estos campos vuelven a mostrarse tal como están aquí.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-secondary mt-3"
+                    onClick={() => { setSelectedPage(null); setActiveSection('hero'); }}
+                  >
+                    <FiEdit3 aria-hidden="true" /> Ir a Portada a editar los mensajes
+                  </button>
+                  <p className="mt-2 text-xs text-amber-800/80">Si tienes cambios sin guardar en esta ventana, se perderán.</p>
+                </div>
+              )}
               {selectedDefinition.fields.map(field => (
                 <div key={field.key} className="field-group">
-                  <label className="label" htmlFor={`page-field-${field.key}`}>{field.label}</label>
+                  <label className="label" htmlFor={`page-field-${field.key}`}>
+                    {field.label}
+                    {hasHeroSlides && selectedDefinition.id === 'home' && LEGACY_HERO_FIELD_KEYS.has(field.key) && (
+                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-[11px] font-semibold uppercase tracking-wide text-amber-800">
+                        <FiAlertCircle size={11} aria-hidden="true" /> No se muestra
+                      </span>
+                    )}
+                  </label>
                   {field.help && <p className="mb-2 text-xs text-gray-500">{field.help}</p>}
                   {field.type === 'image' ? (
                     <div className="space-y-3">

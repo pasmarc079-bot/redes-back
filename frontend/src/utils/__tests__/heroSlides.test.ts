@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_HERO_INTERVAL_SECONDS, MAX_HERO_INTERVAL_SECONDS, MAX_HERO_SLIDES, parseHeroSlides, parseIntervalSeconds, resolveHeroSlides, safeHref, splitAccent } from '@/utils/heroSlides';
+import { DEFAULT_HERO_INTERVAL_SECONDS, DEFAULT_HERO_OVERLAY_OPACITY, MAX_HERO_INTERVAL_SECONDS, MAX_HERO_SLIDES, parseHeroSlides, parseIntervalSeconds, parseOverlayOpacity, resolveHeroSlides, safeHref, splitAccent } from '@/utils/heroSlides';
 
 describe('heroSlides', () => {
   it('acepta una lista JSON válida', () => {
@@ -53,6 +53,20 @@ describe('heroSlides', () => {
     expect(slides[0].secondaryCtaUrl).toBe('/nosotros');
   });
 
+  it('mantiene el aspecto anterior en las diapositivas sin oscuridad configurada', () => {
+    const [sinCampo] = parseHeroSlides(JSON.stringify([{ id: 'x', title: 'Nueva portada' }]));
+    expect(sinCampo.overlayOpacity).toBe(DEFAULT_HERO_OVERLAY_OPACITY);
+    expect(sinCampo.overlayOpacity).toBe(100);
+
+    const legacy = resolveHeroSlides({}, []);
+    expect(legacy[0].overlayOpacity).toBe(100);
+  });
+
+  it('lee la oscuridad de la imagen configurables', () => {
+    const [slide] = parseHeroSlides(JSON.stringify([{ id: 'x', title: 'Hola', overlayOpacity: 60 }]));
+    expect(slide.overlayOpacity).toBe(60);
+  });
+
   it('prefiere las diapositivas configuradas sobre el contenido anterior', () => {
     const slides = resolveHeroSlides(
       { hero_slides: JSON.stringify([{ id: 'x', title: 'Nueva portada' }]) },
@@ -83,5 +97,25 @@ describe('parseIntervalSeconds', () => {
 
   it('redondea hacia abajo los decimales', () => {
     expect(parseIntervalSeconds('7.9')).toBe(7);
+  });
+});
+
+describe('parseOverlayOpacity', () => {
+  it('usa 100 cuando no hay valor guardado', () => {
+    expect(parseOverlayOpacity(undefined)).toBe(100);
+    expect(parseOverlayOpacity(null)).toBe(100);
+    expect(parseOverlayOpacity('')).toBe(100);
+    expect(parseOverlayOpacity('no es un numero')).toBe(100);
+  });
+
+  it('acepta valores entre 0 y 100 y redondea', () => {
+    expect(parseOverlayOpacity(0)).toBe(0);
+    expect(parseOverlayOpacity('45')).toBe(45);
+    expect(parseOverlayOpacity(62.6)).toBe(63);
+  });
+
+  it('limita los valores fuera de rango', () => {
+    expect(parseOverlayOpacity(-20)).toBe(0);
+    expect(parseOverlayOpacity(180)).toBe(100);
   });
 });

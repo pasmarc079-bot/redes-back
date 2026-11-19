@@ -17,6 +17,7 @@ const slide: HeroSlide = {
   secondaryCtaUrl: '/nosotros',
   imageUrl: '',
   mobileImageUrl: '',
+  overlayOpacity: 100,
 };
 
 /** The iframe talks through postMessage; jsdom gives us the window to stub. */
