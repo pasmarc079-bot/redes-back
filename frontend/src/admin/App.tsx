@@ -55,7 +55,8 @@ export default function AdminApp() {
         <Route path="system" element={<SystemInfo />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="dashboard" replace />} />
+      {/* Absolute path: a relative one would keep appending "/dashboard" to whatever URL was typed. */}
+      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
       </Suspense>
     </>
