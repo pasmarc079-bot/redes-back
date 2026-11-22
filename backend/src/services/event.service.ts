@@ -2,6 +2,7 @@ import prisma from '../repository/prisma';
 import { AppError } from '../middleware/errorHandler';
 import slugify from 'slugify';
 import { EventStatus } from '@prisma/client';
+import { isValidEventDate, parseEventDate } from '../utils/eventDate';
 
 export interface CreateEventInput {
   title: string;
@@ -126,6 +127,13 @@ export const getEventBySlug = async (slug: string) => {
 };
 
 export const createEvent = async (input: CreateEventInput, createdById: string) => {
+  if (!isValidEventDate(input.startDate)) {
+    throw new AppError('La fecha de inicio del evento no es válida.', 400);
+  }
+  if (input.endDate && !isValidEventDate(input.endDate)) {
+    throw new AppError('La fecha de fin del evento no es válida.', 400);
+  }
+
   const slug = slugify(input.title, { lower: true, strict: true });
 
   const existing = await prisma.event.findUnique({ where: { slug } });
@@ -143,14 +151,14 @@ export const createEvent = async (input: CreateEventInput, createdById: string) 
     data: {
       ...createData,
       slug,
-      startDate: new Date(input.startDate),
-      endDate: input.endDate ? new Date(input.endDate) : null,
+      startDate: parseEventDate(input.startDate),
+      endDate: input.endDate ? parseEventDate(input.endDate) : null,
       latitude: input.latitude ? parseFloat(input.latitude) : null,
       longitude: input.longitude ? parseFloat(input.longitude) : null,
       createdById,
       status: input.status === EventStatus.CANCELLED
         ? EventStatus.CANCELLED
-        : getAutomaticEventStatus({ startDate: new Date(input.startDate), endDate: input.endDate ? new Date(input.endDate) : null }),
+        : getAutomaticEventStatus({ startDate: parseEventDate(input.startDate), endDate: input.endDate ? parseEventDate(input.endDate) : null }),
     },
   });
 };
@@ -167,8 +175,14 @@ export const updateEvent = async (id: string, input: UpdateEventInput) => {
     if (updateData[key] === '' || updateData[key] === null) delete updateData[key];
   }
 
-  if (input.startDate) updateData.startDate = new Date(input.startDate);
-  if (input.endDate) updateData.endDate = new Date(input.endDate);
+  if (input.startDate) {
+    if (!isValidEventDate(input.startDate)) throw new AppError('La fecha de inicio del evento no es válida.', 400);
+    updateData.startDate = parseEventDate(input.startDate);
+  }
+  if (input.endDate) {
+    if (!isValidEventDate(input.endDate)) throw new AppError('La fecha de fin del evento no es válida.', 400);
+    updateData.endDate = parseEventDate(input.endDate);
+  }
   if (input.title) updateData.slug = slugify(input.title, { lower: true, strict: true });
 
   const nextStartDate = updateData.startDate || event.startDate;

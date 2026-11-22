@@ -6,6 +6,7 @@ import type { BlogPost } from '@/types';
 import Seo from '@/components/Seo';
 import { useSiteStore } from '@/stores/siteStore';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import { overlayVeilStyle } from '@/utils/overlayOpacity';
 
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -27,7 +28,9 @@ export default function Blog() {
       <Seo title="Blog | Ministerio REDES" description="Reflexiones, noticias y testimonios del Ministerio Cristiano REDES." />
       <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
         <ResponsiveCover desktopImage={pageSettings.blog_cover_image_url} mobileImage={pageSettings.blog_cover_image_mobile_url} alt="" />
-        {(pageSettings.blog_cover_image_url || pageSettings.blog_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        {(pageSettings.blog_cover_image_url || pageSettings.blog_cover_image_mobile_url) && (
+          <div className="absolute inset-0 bg-dark" style={overlayVeilStyle(pageSettings.blog_cover_overlay_opacity)} aria-hidden="true" />
+        )}
         <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
             {getText('blog_page_description', 'Reflexiones y Noticias')}

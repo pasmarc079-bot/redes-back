@@ -1,8 +1,10 @@
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiSave, FiAlertCircle, FiFolder } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiAlertCircle, FiFolder, FiImage, FiTrash2 } from 'react-icons/fi';
 import MediaUpload from '@/admin/components/upload/MediaUpload';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
+import { showConfirm } from '@/admin/components/ui/ConfirmModal';
+import { fromEcuadorDateTimeInput, toEcuadorDateTimeInput } from '@/utils/ecuadorTime';
 import adminApi from '@/services/adminApi';
 
 export default function EventForm() {
@@ -32,6 +34,16 @@ export default function EventForm() {
   const [loadError, setLoadError] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  const removeFlyer = async () => {
+    const confirmed = await showConfirm({
+      title: 'Quitar la imagen del evento',
+      message: 'El flyer dejará de mostrarse en el sitio. El archivo se queda en la biblioteca de medios por si lo necesitas otra vez.',
+      confirmLabel: 'Quitar imagen',
+      danger: true,
+    });
+    if (confirmed) setFlyerUrl('');
+  };
+
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
@@ -48,8 +60,9 @@ export default function EventForm() {
             title: e.title,
             shortDescription: e.shortDescription || '',
             description: e.description || '',
-            startDate: e.startDate ? new Date(e.startDate).toISOString().slice(0, 16) : '',
-            endDate: e.endDate ? new Date(e.endDate).toISOString().slice(0, 16) : '',
+            // Shown in Ecuador time, which is what the person typing the event is looking at.
+            startDate: toEcuadorDateTimeInput(e.startDate),
+            endDate: toEcuadorDateTimeInput(e.endDate),
             location: e.location || '',
             address: e.address || '',
             capacity: e.capacity?.toString() || '',
@@ -82,6 +95,8 @@ export default function EventForm() {
     try {
       const data = {
         ...formData,
+        startDate: fromEcuadorDateTimeInput(formData.startDate),
+        endDate: formData.endDate ? fromEcuadorDateTimeInput(formData.endDate) : '',
         capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
         flyerUrl: flyerUrl || undefined,
       };
@@ -116,8 +131,13 @@ export default function EventForm() {
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate('/admin/dashboard/events')} className="text-gray-500 hover:text-gray-700">
-          <FiArrowLeft size={20} />
+        <button
+          type="button"
+          onClick={() => navigate('/admin/dashboard/events')}
+          className="icon-btn text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Volver a la lista de eventos"
+        >
+          <FiArrowLeft size={20} aria-hidden="true" />
         </button>
         <h1 className="font-heading text-2xl font-bold text-gray-800">
           {isEditing ? 'Editar Evento' : 'Nuevo Evento'}
@@ -185,15 +205,22 @@ export default function EventForm() {
             <div className="card p-6">
               <h3 className="font-heading font-semibold text-gray-800 mb-4">Flyer / Imagen</h3>
               {flyerUrl ? (
-                <div className="relative">
-                  <img src={flyerUrl} alt="Flyer" className="w-full rounded-lg" />
-                  <button
-                    type="button"
-                    onClick={() => setFlyerUrl('')}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                  >
-                    <FiArrowLeft size={14} />
-                  </button>
+                <div className="space-y-3">
+                  <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50" style={{ aspectRatio: '16/9' }}>
+                    <img src={flyerUrl} alt="Flyer del evento" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setMediaPickerOpen(true)} className="btn btn-secondary min-h-11 flex-1 justify-center text-sm">
+                      <FiImage aria-hidden="true" /> Cambiar imagen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeFlyer}
+                      className="btn min-h-11 flex-1 justify-center border-2 border-red-200 bg-red-50 text-sm font-semibold text-red-700 hover:border-red-300 hover:bg-red-100"
+                    >
+                      <FiTrash2 aria-hidden="true" /> Quitar imagen
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">

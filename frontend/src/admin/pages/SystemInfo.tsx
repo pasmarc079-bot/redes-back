@@ -78,12 +78,54 @@ const endpoints = [
   { method: 'GET', path: '/api/v1/posts', desc: 'Lista de artículos del blog' },
   { method: 'GET', path: '/api/v1/social/configs', desc: 'Configuración de redes sociales' },
   { method: 'GET', path: '/api/v1/site/settings', desc: 'Configuración general del sitio' },
+  { method: 'PUT', path: '/api/v1/site/settings', desc: 'Guardar ajustes validados (portadas, métricas, galería, contacto)' },
+  { method: 'GET', path: '/api/v1/site/services', desc: 'Horarios de servicios y reuniones' },
+  { method: 'POST', path: '/api/v1/site/services', desc: 'Crear un horario (auth)' },
   { method: 'POST', path: '/api/v1/contact', desc: 'Enviar mensaje de contacto' },
   { method: 'POST', path: '/api/v1/admin/events', desc: 'Crear evento (auth)' },
   { method: 'PUT', path: '/api/v1/admin/events/:id', desc: 'Actualizar evento (auth)' },
   { method: 'POST', path: '/api/v1/admin/posts', desc: 'Crear artículo (auth)' },
   { method: 'POST', path: '/api/v1/admin/media/upload', desc: 'Subir imagen (auth)' },
   { method: 'GET', path: '/api/v1/admin/media/health', desc: 'Estado de Cloudinary (auth)' },
+];
+
+const configurableContent = [
+  {
+    area: 'Horarios y reuniones',
+    where: 'Configuración → Horarios',
+    stored: 'service_schedules',
+    detail: 'Se muestran en “Nuestros Servicios” (Nosotros) y en “Reuniones” del pie de página.',
+  },
+  {
+    area: 'Métricas del inicio',
+    where: 'Configuración → Métricas',
+    stored: 'site_settings.metrics_items',
+    detail: 'Número, sufijo y etiqueta. Se animan de 0 al valor al llegar a la sección, entre “Nuestra Iglesia” y los testimonios.',
+  },
+  {
+    area: 'Galería de la comunidad',
+    where: 'Configuración → Galería',
+    stored: 'site_settings.community_gallery + community_gallery_interval',
+    detail: 'Tira horizontal con varias fotos visibles a la vez (5, 4, 3, 2 o 1 según el ancho), arriba de “Nuestras redes” en Inicio y en Comunidad. Con 0 segundos no avanza sola.',
+  },
+  {
+    area: 'Misión, visión y propósito',
+    where: 'Configuración → Páginas → Nosotros',
+    stored: 'site_settings.mission / vision / purpose',
+    detail: 'Se reutilizan en Inicio (Nuestra Iglesia) y en la página Nosotros.',
+  },
+  {
+    area: 'Portadas por página y su oscuridad',
+    where: 'Configuración → Páginas → cualquier página',
+    stored: 'site_settings.<página>_cover_image_url / _mobile_url / _overlay_opacity',
+    detail: 'Imagen distinta para computadora y celular, más el porcentaje de oscuridad (0 claro, 100 oscuro).',
+  },
+  {
+    area: 'Zona horaria de eventos',
+    where: 'Eventos → Nuevo / Editar',
+    stored: 'events.start_date (UTC en la base de datos)',
+    detail: 'La hora que se escribe se interpreta como América/Guayaquil (UTC-5) y se guarda como instante; cada visitante la ve en su propia zona.',
+  },
 ];
 
 const methodColors: Record<string, string> = {
@@ -145,6 +187,36 @@ export default function SystemInfo() {
               </ul>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Configurable content */}
+      <div className="card card-body p-6">
+        <h2 className="font-heading text-xl font-semibold text-gray-800 mb-2">Contenido y parámetros editables</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Todo el contenido del sitio se edita desde el panel. Esta tabla resume dónde vive cada cosa y en qué clave se guarda.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-2 px-3 font-medium text-gray-500">Qué</th>
+                <th className="text-left py-2 px-3 font-medium text-gray-500">Dónde se edita</th>
+                <th className="text-left py-2 px-3 font-medium text-gray-500">Dónde se guarda</th>
+                <th className="text-left py-2 px-3 font-medium text-gray-500">Detalle</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {configurableContent.map((row) => (
+                <tr key={row.area} className="hover:bg-gray-50 align-top">
+                  <td className="py-2 px-3 font-medium text-gray-800">{row.area}</td>
+                  <td className="py-2 px-3 text-gray-600">{row.where}</td>
+                  <td className="py-2 px-3 font-mono text-xs text-gray-700">{row.stored}</td>
+                  <td className="py-2 px-3 text-gray-600">{row.detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

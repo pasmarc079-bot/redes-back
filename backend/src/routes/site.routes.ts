@@ -53,10 +53,21 @@ router.put('/pages/:pageKey', authenticate, authorize('ADMIN'), async (req, res)
     return res.status(400).json({ error: 'Invalid page configuration payload' });
   }
 
+  const parsed = Object.keys(settings).length > 0 ? parseSiteSettingsUpdate(settings) : { values: {} };
+  if (parsed.error || !parsed.values) {
+    return res.status(400).json({ error: parsed.error ?? 'Los datos enviados no son válidos.' });
+  }
+
   await prisma.$transaction([
-    ...Object.entries(settings).map(([key, value]) =>
-      prisma.siteSetting.update({ where: { key }, data: { value } })
-    ),
+    ...Object.entries(parsed.values).map(([key, value]) => {
+      const meta = SITE_SETTING_META[key];
+      // Upsert so a setting that is missing in an older database is created instead of failing.
+      return prisma.siteSetting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value, label: meta.label, group: meta.group, type: meta.type },
+      });
+    }),
     ...content.map(item => prisma.pageContent.update({
       where: { key: item.key },
       data: pickFields(item, contentUpdateFields),

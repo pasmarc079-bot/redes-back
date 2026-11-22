@@ -5,6 +5,8 @@ import Seo from '@/components/Seo';
 import SocialChannelsSection from '@/components/social/SocialChannelsSection';
 import TestimoniesSection from '@/sections/testimonies';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import CommunityGallery from '@/sections/community-gallery/CommunityGallery';
+import { overlayVeilStyle } from '@/utils/overlayOpacity';
 import { normalizeWhatsAppNumber } from '@/utils/phone';
 
 export default function Community() {
@@ -24,7 +26,9 @@ export default function Community() {
       <Seo title="Comunidad | Ministerio REDES" description="Conéctate con la comunidad del Ministerio Cristiano REDES." />
        <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
         <ResponsiveCover desktopImage={settings.community_cover_image_url} mobileImage={settings.community_cover_image_mobile_url} alt="" />
-        {(settings.community_cover_image_url || settings.community_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        {(settings.community_cover_image_url || settings.community_cover_image_mobile_url) && (
+          <div className="absolute inset-0 bg-dark" style={overlayVeilStyle(settings.community_cover_overlay_opacity)} aria-hidden="true" />
+        )}
         <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
             Comunidad
@@ -39,6 +43,8 @@ export default function Community() {
       </section>
 
       <TestimoniesSection variant="community" />
+
+      <CommunityGallery variant="community" />
 
       <SocialChannelsSection eyebrow="Comunidad" title="Síguenos en Redes Sociales" variant="dark" />
 

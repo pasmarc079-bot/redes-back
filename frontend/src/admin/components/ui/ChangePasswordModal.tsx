@@ -67,7 +67,7 @@ export default function ChangePasswordModal({ open, onClose }: ChangePasswordMod
               <FiKey aria-hidden="true" /> Cambiar contraseña
             </h4>
           </div>
-          <button type="button" onClick={close} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar">
+          <button type="button" onClick={close} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar">
             <FiX size={20} aria-hidden="true" />
           </button>
         </div>

@@ -1,3 +1,7 @@
+import { clampOverlayOpacity, DEFAULT_HERO_OVERLAY_OPACITY } from './overlayOpacity';
+
+export { DEFAULT_HERO_OVERLAY_OPACITY };
+
 export interface HeroSlide {
   id: string;
   /** Small gold line above the title, e.g. "Ministerio Cristiano". */
@@ -97,17 +101,12 @@ export function resolveHeroSlides(
   }];
 }
 
-export const DEFAULT_HERO_OVERLAY_OPACITY = 100;
-
 /**
  * Percent of darkness over the photo, kept between 0 and 100. Slides saved before this option
  * existed have no value and keep the original look, so nothing changes until someone moves the slider.
  */
 export function parseOverlayOpacity(value: unknown): number {
-  if (value === undefined || value === null || value === '') return DEFAULT_HERO_OVERLAY_OPACITY;
-  const parsed = typeof value === 'number' ? value : Number(value);
-  if (!Number.isFinite(parsed)) return DEFAULT_HERO_OVERLAY_OPACITY;
-  return Math.min(100, Math.max(0, Math.round(parsed)));
+  return clampOverlayOpacity(value, DEFAULT_HERO_OVERLAY_OPACITY);
 }
 
 export const DEFAULT_HERO_INTERVAL_SECONDS = 6;

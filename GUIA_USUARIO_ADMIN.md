@@ -1,7 +1,7 @@
 # Guía de Usuario — Panel de Administración Ministerio REDES
 
-> **Versión:** 1.0  
-> **Fecha:** Octubre 2026  
+> **Versión:** 1.1  
+> **Fecha:** Noviembre 2026  
 > **Autor:** Equipo de Desarrollo Ministerio REDES
 
 ---
@@ -15,6 +15,9 @@
 5. [Gestión del Blog](#gestión-del-blog)
 6. [Biblioteca de Media](#biblioteca-de-media)
 7. [Configuración del Sitio](#configuración-del-sitio)
+   - [Horarios de servicios y reuniones](#pestaña-horarios-servicios-y-reuniones)
+   - [Métricas animadas del inicio](#pestaña-métricas-del-inicio)
+   - [Galería de la comunidad](#pestaña-galería-de-la-comunidad)
 8. [Información del Sistema](#información-del-sistema)
 9. [Atajos de Teclado](#atajos-de-teclado)
 10. [Solución de Problemas](#solución-de-problemas)
@@ -165,7 +168,7 @@ El sistema calcula el estado **solo por fechas** — **no hay campo manual de es
 
 1. Click **[Nuevo evento]** (botón principal o en Dashboard)
 2. Completa el formulario (ver [Campos del Evento](#campos-del-evento))
-3. Sube **flyer** (arrastra o elige de biblioteca)
+3. Sube **flyer** (arrastra o elige de biblioteca). Con la imagen cargada verás siempre dos botones: **[Cambiar imagen]** y **[Quitar imagen]** (pide confirmación)
 4. Pulsa **[Crear evento]**
 
 ![Evento - Nuevo](admin_screenshots/04_evento_nuevo.png)
@@ -191,7 +194,7 @@ El sistema calcula el estado **solo por fechas** — **no hay campo manual de es
 |-------|-------|----------|
 | Evento no aparece en "Próximos" | Fecha inicio pasada | Usa fecha futura (zona UTC-5) |
 | Estado "Finalizado" inesperado | Fecha fin en el pasado | Deja fecha fin vacía o futura |
-| Zona horaria incorrecta | Navegador en otra zona | El sistema usa UTC-5 (Ecuador) siempre |
+| Zona horaria incorrecta | Navegador en otra zona | La hora que escribes se interpreta como **Ecuador (UTC-5)**; el visitante la ve en su propia zona |
 
 ### Editar Evento
 
@@ -457,10 +460,15 @@ Click ℹ️ → badge verde muestra: "evento: Exaltando 2026", "blog: Artículo
 
 Menú lateral → **Configuración** → `/admin/dashboard/settings`
 
-Dos pestañas principales:
+Pestañas principales:
 
-1. **Configuración de Páginas** — textos, imágenes, orden del menú
+1. **Configuración de Páginas** — textos, imágenes, opacidad de portadas, orden del menú
 2. **Enlaces Externos y Contacto** — datos institucionales, redes sociales
+3. **Horarios** — servicios y reuniones (Nosotros y pie de página)
+4. **Métricas** — números animados del inicio
+5. **Galería** — tira de fotos de la comunidad (varias a la vez)
+6. **Portada** — mensajes del carrusel del inicio
+7. **Testimonios** — videos y reseñas
 
 ---
 
@@ -494,11 +502,11 @@ Dos pestañas principales:
 | Página | URL | Campos Principales |
 |--------|-----|-------------------|
 | **Inicio** | `/` | Título hero, subtítulo, eslogan, imágenes hero (desktop/mobile), mostrar redes |
-| **Nosotros** | `/nosotros` | Título, imágenes portada, historia, misión, visión, foto pastor |
-| **Eventos** | `/eventos` | Título, descripción, imágenes portada |
-| **Blog** | `/blog` | Título, descripción, imágenes portada |
-| **Comunidad** | `/comunidad` | Título, descripción, imágenes portada |
-| **Contacto** | `/contacto` | Mensaje bienvenida, imágenes portada |
+| **Nosotros** | `/nosotros` | Título, imágenes portada y su oscuridad, historia, misión, visión, propósito, foto pastor |
+| **Eventos** | `/eventos` | Título, descripción, imágenes portada y su oscuridad |
+| **Blog** | `/blog` | Título, descripción, imágenes portada y su oscuridad |
+| **Comunidad** | `/comunidad` | Título, descripción, imágenes portada y su oscuridad |
+| **Contacto** | `/contacto` | Mensaje bienvenida, imágenes portada y su oscuridad |
 
 #### Tipos de Campo
 
@@ -507,6 +515,7 @@ Dos pestañas principales:
 | **text** | Input línea única | Título, eslogan |
 | **textarea** | Área de texto (5 líneas) | Historia, misión, descripción |
 | **image** | Vista previa + [Elegir de biblioteca] / [Quitar] | Hero, portada, foto pastor |
+| **opacity** | Control deslizante 0–100% con vista del valor | Oscuridad de la imagen de portada |
 | **boolean** | Checkbox | "Mostrar sección Nuestras Redes" |
 
 #### Imágenes en Páginas
@@ -514,6 +523,67 @@ Dos pestañas principales:
 - Cada página tiene **2 campos de imagen**: `*_url` (desktop) y `*_mobile_url` (móvil)
 - Click **[Elegir de biblioteca]** → selecciona de Media Library
 - Click **[Quitar imagen]** → deja campo vacío
+- Cada portada tiene además **“Oscuridad de la imagen de portada”**: 0% deja la foto clara y 100% la oscurece al máximo. El valor se guarda junto con la página en **[Guardar cambios]**.
+
+#### Misión, Visión y Propósito
+
+Los tres textos viven en **Configuración → Páginas → Nosotros** (campos “Misión”, “Visión” y “Propósito”) y se reutilizan en dos lugares: el bloque **“Nuestra Iglesia”** del inicio y la página **Nosotros** (“Nuestra Misión”, “Nuestra Visión”, “Nuestro Propósito”). Al guardar, ambos se actualizan.
+
+---
+
+### Pestaña Horarios (servicios y reuniones)
+
+Menú **Configuración → pestaña Horarios**. Esta lista alimenta dos lugares a la vez:
+
+- **“Nuestros Servicios”** en la página Nosotros (nombre, descripción, día y hora)
+- **“Reuniones”** en el pie de página del sitio (día y hora)
+
+| Acción | Cómo |
+|--------|------|
+| **Editar** | Cambia los campos de la fila y pulsa **[Guardar horarios]** |
+| **Elegir el día** | **Día** es una lista desplegable con los siete días (Domingo a Sábado): no hace falta escribirlo |
+| **Elegir la hora** | **Hora** es un selector de hora: escribe o usa las flechas / el reloj del navegador (pasos de 5 minutos). Debajo se ve cómo quedará publicada, por ejemplo *Se verá: 9:00 AM* |
+| **Agregar** | **[Agregar horario]** → elige Día y Hora (obligatorios), nombre y descripción opcionales |
+| **Ordenar** | Flechas ↑↓ de cada fila; el primero se muestra primero |
+| **Ocultar sin borrar** | Desmarca **Activo** |
+| **Eliminar** | Icono 🗑 → confirma en el modal |
+
+> Si un horario queda sin guardar aparece el aviso *“Tienes cambios sin guardar.”*; el botón **Guardar horarios** se activa solo en ese momento.
+>
+> La hora se guarda en el formato de siempre (**9:00 AM**), así que el sitio no cambia de aspecto: solo cambió la forma de elegirla. Si un horario antiguo tenía un texto raro (por ejemplo “por confirmar”), aparece igual en el selector hasta que elijas una hora real.
+
+---
+
+### Pestaña Métricas del inicio
+
+Los números que se ven en el inicio, entre **“Nuestra Iglesia”** y **“Lo que dice nuestra comunidad”**. Se animan de 0 hasta su valor cuando el visitante llega a esa sección.
+
+| Campo | Qué escribir | Ejemplo |
+|-------|--------------|---------|
+| **Número** | Solo cifras, sin puntos ni comas | `500` |
+| **Sufijo** | Lo que va pegado al número (puede ir vacío) | `+` |
+| **Etiqueta** | Texto debajo del número | `Eventos realizados` |
+
+- **[Agregar métrica]** hasta 8; **[Guardar métricas]** publica los cambios.
+- Las flechas ↑↓ cambian el orden.
+- Si borras todas, el inicio vuelve a mostrar las cifras iniciales (10, 500, 100 y 200).
+
+---
+
+### Pestaña Galería de la comunidad
+
+Tira horizontal de fotos que avanza sola, **arriba de “Nuestras redes”** en el inicio y en la página Comunidad. A diferencia de un carrusel de una sola foto, aquí se ven **varias fotos a la vez**: 5 en pantallas grandes, 4 en portátiles, 3 en tablet, 2 en tablet pequeña y 1 en celular.
+
+| Acción | Cómo |
+|--------|------|
+| **Agregar foto** | **[Agregar foto]** → **[Elegir foto]** (biblioteca de medios) |
+| **Texto alternativo** | Describe la foto para lectores de pantalla (ej. “Jóvenes en el retiro”) |
+| **Texto sobre la foto** | Opcional; aparece en una franja oscura sobre la imagen |
+| **Ordenar** | Flechas ↑↓ (también define qué fotos se ven primero) |
+| **Quitar** | Icono 🗑 → confirma en el modal (el archivo queda en la biblioteca) |
+| **Ritmo** | “Segundos entre fotos”: 0 significa que no avanza sola |
+
+La tira se mueve de una foto por vez y se detiene cuando el visitante pasa el mouse o navega con teclado; tiene botón de pausa, flechas y puntos (cada punto es un grupo de fotos, no una foto suelta). Sin fotos, la sección no se muestra. Si hay menos fotos que el espacio disponible, no se muestran flechas ni puntos.
 
 ---
 
@@ -642,6 +712,12 @@ Solo lectura — documentación técnica:
 3. Click **[Guardar orden del menú]**
 4. Recarga el sitio público (`Ctrl + F5`)
 
+### La hora del evento se ve distinta
+
+- La **fecha y hora que escribes** en el formulario son de Ecuador (UTC-5); así se muestran también al volver a editar el evento.
+- El sitio público convierte ese momento a la **zona horaria del visitante**: 5:30 p. m. en Ecuador puede ser la noche en otro país, y es correcto.
+- Si un evento guardado antes de esta corrección se veía corrido, vuelve a abrirlo, revisa la hora y pulsa **[Actualizar]**.
+
 ### El evento no aparece en "Próximos"
 
 - Verifica **Fecha de inicio** (debe ser futura)
@@ -709,6 +785,8 @@ La base de datos (PostgreSQL en Seenode) tiene backups automáticos diarios. Las
 | Versión | Fecha | Cambios |
 |---------|-------|---------|
 | 1.0 | Oct 2026 | Guía inicial completa |
+| 1.1 | Nov 2026 | Horarios editables (servicios y reuniones), métricas animadas del inicio, galería de la comunidad, Misión/Visión/Propósito editables, opacidad de portadas reutilizable, corrección de la zona horaria de eventos, botón claro “Quitar imagen” en eventos y blog, e iconos centrados en los botones del panel |
+| 1.2 | Nov 2026 | “Nuestra comunidad en fotos” pasa de una foto gigante a una tira horizontal con varias fotos visibles a la vez (5/4/3/2/1 según pantalla), conservando el avance automático, pausa, flechas y puntos |
 
 ---
 

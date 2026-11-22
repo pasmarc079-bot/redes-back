@@ -44,6 +44,20 @@
     @apply text-cream hover:text-gold-light;
   }
 
+  /* Square button that only holds an icon: the glyph stays centred instead of drifting to a side. */
+  .icon-btn {
+    @apply inline-flex shrink-0 items-center justify-center rounded-lg transition-colors;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .icon-btn > svg {
+    display: block;
+    flex-shrink: 0;
+  }
+
   .section-padding {
     @apply px-4 py-16 md:px-8 md:py-24 lg:px-16;
   }

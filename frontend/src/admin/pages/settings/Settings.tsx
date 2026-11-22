@@ -6,12 +6,17 @@ import { siteApi, socialApi } from '@/services/api';
 import { normalizeWhatsAppNumber, isValidWhatsAppNumber, formatWhatsAppNumber } from '@/utils/phone';
 import TestimoniesSettings from './TestimoniesSettings';
 import HeroSlidesSettings from './HeroSlidesSettings';
+import MetricsSettings from './MetricsSettings';
+import GallerySettings from './GallerySettings';
+import ServicesSettings from './ServicesSettings';
+import OverlayOpacityField from '@/admin/components/ui/OverlayOpacityField';
+import { DEFAULT_COVER_OVERLAY_OPACITY, clampOverlayOpacity } from '@/utils/overlayOpacity';
 import { getSitePage, type SitePageId } from '@/config/sitePages';
 import { parseHeroSlides } from '@/utils/heroSlides';
 
 type PageId = SitePageId;
 type FieldSource = 'content' | 'setting';
-type FieldType = 'text' | 'textarea' | 'image' | 'boolean';
+type FieldType = 'text' | 'textarea' | 'image' | 'boolean' | 'opacity';
 
 interface SiteSetting {
   key: string;
@@ -83,10 +88,12 @@ const pages: PageDefinition[] = [
       { key: 'about_page_title', label: 'Título principal', source: 'content', type: 'text' },
       { key: 'about_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
       { key: 'about_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
+      { key: 'about_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity', help: '0% deja la foto clara y 100% la oscurece al máximo. Se aplica igual en computadora y celular.' },
       { key: 'about_intro', label: 'Historia / Introducción', source: 'content', type: 'textarea' },
       { key: 'church_history', label: 'Historia del ministerio', source: 'setting', type: 'textarea' },
-      { key: 'mission', label: 'Misión', source: 'setting', type: 'textarea' },
-      { key: 'vision', label: 'Visión', source: 'setting', type: 'textarea' },
+      { key: 'mission', label: 'Misión', source: 'setting', type: 'textarea', help: 'Se muestra en Inicio (Nuestra Iglesia) y en Nosotros.' },
+      { key: 'vision', label: 'Visión', source: 'setting', type: 'textarea', help: 'Se muestra en Inicio (Nuestra Iglesia) y en Nosotros.' },
+      { key: 'purpose', label: 'Propósito', source: 'setting', type: 'textarea', help: 'Se muestra en Inicio (Nuestra Iglesia) y en Nosotros, en “Nuestro Propósito”.' },
       { key: 'pastor_photo_url', label: 'Imagen representativa / pastor', source: 'setting', type: 'image' },
     ],
   },
@@ -97,6 +104,7 @@ const pages: PageDefinition[] = [
         { key: 'events_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
         { key: 'events_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
         { key: 'events_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
+        { key: 'events_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity' },
     ],
   },
   {
@@ -106,6 +114,7 @@ const pages: PageDefinition[] = [
         { key: 'blog_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
         { key: 'blog_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
         { key: 'blog_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
+        { key: 'blog_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity' },
     ],
   },
   {
@@ -115,6 +124,7 @@ const pages: PageDefinition[] = [
         { key: 'community_page_description', label: 'Texto introductorio', source: 'content', type: 'textarea' },
         { key: 'community_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
         { key: 'community_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
+        { key: 'community_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity' },
     ],
   },
   {
@@ -123,6 +133,7 @@ const pages: PageDefinition[] = [
         { key: 'contact_welcome', label: 'Mensaje de bienvenida', source: 'content', type: 'text' },
         { key: 'contact_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
         { key: 'contact_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
+        { key: 'contact_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity' },
       ],
   },
 ];
@@ -144,7 +155,7 @@ export default function Settings() {
   const [contents, setContents] = useState<PageContent[]>([]);
   const [socials, setSocials] = useState<SocialConfig[]>([]);
   const [selectedPage, setSelectedPage] = useState<PageId | null>(null);
-  const [activeSection, setActiveSection] = useState<'pages' | 'external' | 'testimonies' | 'hero'>('pages');
+  const [activeSection, setActiveSection] = useState<'pages' | 'external' | 'services' | 'metrics' | 'gallery' | 'testimonies' | 'hero'>('pages');
   const [savingPage, setSavingPage] = useState(false);
   const [savingMenu, setSavingMenu] = useState(false);
   const [savingExternal, setSavingExternal] = useState(false);
@@ -200,8 +211,12 @@ export default function Settings() {
     setSavingPage(true);
     try {
       const pageFields = new Set(page.fields.map(field => field.key));
+      // Built from the fields (not from the loaded rows) so a setting that does not exist yet, such
+      // as a new opacity value, is saved too instead of being silently left out.
       const pageSettings = Object.fromEntries(
-        settings.filter(item => pageFields.has(item.key)).map(item => [item.key, item.value]),
+        page.fields
+          .filter(field => field.source === 'setting')
+          .map(field => [field.key, getFieldValue(field) || (field.type === 'opacity' ? String(DEFAULT_COVER_OVERLAY_OPACITY) : '')]),
       );
       const pageContent = contents
         .filter(item => pageFields.has(item.key))
@@ -320,6 +335,9 @@ export default function Settings() {
       <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-4" role="tablist" aria-label="Configuración del sitio">
         <button type="button" role="tab" aria-selected={activeSection === 'pages'} onClick={() => setActiveSection('pages')} className={`tab ${activeSection === 'pages' ? 'tab-active' : 'tab-inactive'}`}>Configuración de Páginas</button>
         <button type="button" role="tab" aria-selected={activeSection === 'external'} onClick={() => setActiveSection('external')} className={`tab ${activeSection === 'external' ? 'tab-active' : 'tab-inactive'}`}>Enlaces Externos y Contacto</button>
+        <button type="button" role="tab" aria-selected={activeSection === 'services'} onClick={() => setActiveSection('services')} className={`tab ${activeSection === 'services' ? 'tab-active' : 'tab-inactive'}`}>Horarios</button>
+        <button type="button" role="tab" aria-selected={activeSection === 'metrics'} onClick={() => setActiveSection('metrics')} className={`tab ${activeSection === 'metrics' ? 'tab-active' : 'tab-inactive'}`}>Métricas</button>
+        <button type="button" role="tab" aria-selected={activeSection === 'gallery'} onClick={() => setActiveSection('gallery')} className={`tab ${activeSection === 'gallery' ? 'tab-active' : 'tab-inactive'}`}>Galería</button>
         <button type="button" role="tab" aria-selected={activeSection === 'hero'} onClick={() => setActiveSection('hero')} className={`tab ${activeSection === 'hero' ? 'tab-active' : 'tab-inactive'}`}>Portada</button>
         <button type="button" role="tab" aria-selected={activeSection === 'testimonies'} onClick={() => setActiveSection('testimonies')} className={`tab ${activeSection === 'testimonies' ? 'tab-active' : 'tab-inactive'}`}>Testimonios</button>
       </div>
@@ -356,7 +374,7 @@ export default function Settings() {
                 className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-gold/60 hover:bg-white md:flex-row md:items-center"
               >
                 <div className="flex items-center gap-3 md:w-10">
-                  <button type="button" className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-700" aria-label={`Arrastrar ${page.label}`}>
+                  <button type="button" className="flex icon-btn items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200 hover:text-gray-700" aria-label={`Arrastrar ${page.label}`}>
                     <FiMenu size={19} />
                   </button>
                   <span className="text-sm font-semibold text-gray-400 md:hidden">{index + 1}</span>
@@ -384,8 +402,8 @@ export default function Settings() {
                     Visible en menú
                   </label>
                   <div className="flex items-center">
-                    <button type="button" onClick={() => movePage(page, -1)} disabled={index === 0} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30" aria-label={`Subir ${page.label}`}><FiChevronUp /></button>
-                    <button type="button" onClick={() => movePage(page, 1)} disabled={index === orderedPages.length - 1} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30" aria-label={`Bajar ${page.label}`}><FiChevronDown /></button>
+                    <button type="button" onClick={() => movePage(page, -1)} disabled={index === 0} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30" aria-label={`Subir ${page.label}`}><FiChevronUp /></button>
+                    <button type="button" onClick={() => movePage(page, 1)} disabled={index === orderedPages.length - 1} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-30" aria-label={`Bajar ${page.label}`}><FiChevronDown /></button>
                   </div>
                   <button type="button" onClick={() => setSelectedPage(page.id)} className="btn btn-secondary whitespace-nowrap">
                     <FiEdit3 /> Editar Contenido
@@ -406,7 +424,7 @@ export default function Settings() {
                 <h4 id="page-editor-title" className="mt-1 font-heading text-xl font-semibold text-gray-800">{selectedDefinition.label}</h4>
                 <p className="mt-1 text-sm text-gray-500">Edita únicamente lo que verán los visitantes.</p>
               </div>
-              <button type="button" onClick={() => setSelectedPage(null)} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} /></button>
+              <button type="button" onClick={() => setSelectedPage(null)} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} /></button>
             </div>
             <div className="space-y-5 px-5 py-6 sm:px-7">
               {hasHeroSlides && selectedDefinition.id === 'home' && (
@@ -430,15 +448,15 @@ export default function Settings() {
               )}
               {selectedDefinition.fields.map(field => (
                 <div key={field.key} className="field-group">
-                  <label className="label" htmlFor={`page-field-${field.key}`}>
+                  {field.type !== 'opacity' && <label className="label" htmlFor={`page-field-${field.key}`}>
                     {field.label}
                     {hasHeroSlides && selectedDefinition.id === 'home' && LEGACY_HERO_FIELD_KEYS.has(field.key) && (
                       <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-[11px] font-semibold uppercase tracking-wide text-amber-800">
                         <FiAlertCircle size={11} aria-hidden="true" /> No se muestra
                       </span>
                     )}
-                  </label>
-                  {field.help && <p className="mb-2 text-xs text-gray-500">{field.help}</p>}
+                  </label>}
+                  {field.help && field.type !== 'opacity' && <p className="mb-2 text-xs text-gray-500">{field.help}</p>}
                   {field.type === 'image' ? (
                     <div className="space-y-3">
                       {getFieldValue(field) ? (
@@ -451,6 +469,14 @@ export default function Settings() {
                       </button>
                       {getFieldValue(field) && <button type="button" className="ml-2 min-h-11 rounded-lg px-3 text-sm text-red-500 hover:bg-red-50" onClick={() => updateSetting(field.key, '')}><FiTrash2 className="inline" /> Quitar imagen</button>}
                     </div>
+                  ) : field.type === 'opacity' ? (
+                    <OverlayOpacityField
+                      id={`page-field-${field.key}`}
+                      label={field.label}
+                      help={field.help}
+                      value={clampOverlayOpacity(getFieldValue(field), DEFAULT_COVER_OVERLAY_OPACITY)}
+                      onChange={value => updateSetting(field.key, String(value))}
+                    />
                   ) : field.type === 'boolean' ? (
                     <label className="flex min-h-11 items-center gap-3 text-sm text-gray-700">
                       <input id={`page-field-${field.key}`} type="checkbox" checked={getFieldValue(field) !== 'false'} onChange={event => updateField(field, String(event.target.checked))} className="rounded border-gray-300 text-gold focus:ring-gold/20" />
@@ -484,6 +510,12 @@ export default function Settings() {
       </>
       ) : activeSection === 'hero' ? (
         <HeroSlidesSettings />
+      ) : activeSection === 'metrics' ? (
+        <MetricsSettings />
+      ) : activeSection === 'gallery' ? (
+        <GallerySettings />
+      ) : activeSection === 'services' ? (
+        <ServicesSettings />
       ) : activeSection === 'testimonies' ? (
         <TestimoniesSettings />
       ) : (
@@ -550,11 +582,11 @@ function ExternalContactSettings({ settings, socials, updateSetting, updateSocia
           {socials.map((social, index) => (
             <div key={social.id || `new-${index}`} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
               <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[auto_170px_1fr_auto_auto]">
-                <button type="button" className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200" aria-label={`Ordenar ${social.platform}`}><FiMenu /></button>
+                <button type="button" className="flex icon-btn items-center justify-center rounded-lg text-gray-400 hover:bg-gray-200" aria-label={`Ordenar ${social.platform}`}><FiMenu /></button>
                 <div><label className="label" htmlFor={`social-platform-${index}`}>Plataforma</label><select id={`social-platform-${index}`} value={social.platform} onChange={event => updateSocial(index, 'platform', event.target.value)} className="select"><option value="facebook">Facebook</option><option value="youtube">YouTube</option><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="whatsapp">WhatsApp</option><option value="twitter">X / Twitter</option><option value="telegram">Telegram</option></select></div>
                 <div><label className="label" htmlFor={`social-url-${index}`}>Enlace público</label><input id={`social-url-${index}`} type="url" value={social.accountUrl || ''} onChange={event => updateSocial(index, 'accountUrl', event.target.value)} className="input" placeholder="https://..." /></div>
                 <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={social.isActive} onChange={event => updateSocial(index, 'isActive', event.target.checked)} className="rounded border-gray-300 text-gold focus:ring-gold/20" />Activo</label>
-                <button type="button" onClick={() => removeSocial(social.id)} className="min-h-11 min-w-11 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Eliminar ${social.platform}`}><FiTrash2 /></button>
+                <button type="button" onClick={() => removeSocial(social.id)} className="icon-btn rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Eliminar ${social.platform}`}><FiTrash2 /></button>
               </div>
               <div className="mt-2 flex justify-end gap-1"><button type="button" onClick={() => moveSocial(index, -1)} disabled={index === 0} className="min-h-9 min-w-9 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30" aria-label={`Subir ${social.platform}`}><FiChevronUp /></button><button type="button" onClick={() => moveSocial(index, 1)} disabled={index === socials.length - 1} className="min-h-9 min-w-9 rounded text-gray-500 hover:bg-gray-200 disabled:opacity-30" aria-label={`Bajar ${social.platform}`}><FiChevronDown /></button></div>
             </div>

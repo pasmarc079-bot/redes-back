@@ -8,6 +8,7 @@ import EventImage from '@/components/events/EventImage';
 import Seo from '@/components/Seo';
 import { useSiteStore } from '@/stores/siteStore';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import { overlayVeilStyle } from '@/utils/overlayOpacity';
 
 const statusLabels: Record<string, string> = {
   UPCOMING: 'Próximo',
@@ -41,7 +42,9 @@ export default function Events() {
       <Seo title="Eventos | Ministerio REDES" description="Conoce los próximos eventos y actividades del Ministerio REDES en Lago Agrio." />
       <section data-nav-theme="dark" className="relative overflow-hidden bg-dark py-20 md:py-28">
         <ResponsiveCover desktopImage={pageSettings.events_cover_image_url} mobileImage={pageSettings.events_cover_image_mobile_url} alt="" />
-        {(pageSettings.events_cover_image_url || pageSettings.events_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+        {(pageSettings.events_cover_image_url || pageSettings.events_cover_image_mobile_url) && (
+          <div className="absolute inset-0 bg-dark" style={overlayVeilStyle(pageSettings.events_cover_overlay_opacity)} aria-hidden="true" />
+        )}
         <div className="container-custom relative z-10 text-center">
           <p className="font-heading text-gold uppercase tracking-[0.2em] text-sm mb-4">
             {getText('events_page_description', 'Únete a nosotros')}

@@ -234,7 +234,7 @@ export default function HeroSlidesSettings() {
                 </div>
                 <div className="flex items-center justify-end gap-2">
                   <button type="button" onClick={() => openEditor(slide, index)} disabled={saving} className="btn btn-secondary whitespace-nowrap"><FiEdit3 aria-hidden="true" /> Editar</button>
-                  <button type="button" onClick={() => remove(index)} disabled={saving} className="min-h-11 min-w-11 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Quitar mensaje ${index + 1}`}><FiTrash2 aria-hidden="true" /></button>
+                  <button type="button" onClick={() => remove(index)} disabled={saving} className="icon-btn rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Quitar mensaje ${index + 1}`}><FiTrash2 aria-hidden="true" /></button>
                 </div>
               </li>
             ))}
@@ -289,7 +289,7 @@ export default function HeroSlidesSettings() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-gold-dark">Portada</p>
                 <h4 id="hero-editor-title" className="mt-1 font-heading text-xl font-semibold text-gray-800">{editingIndex === null ? 'Nuevo mensaje' : `Editar mensaje ${editingIndex + 1}`}</h4>
               </div>
-              <button type="button" onClick={() => setEditing(null)} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} aria-hidden="true" /></button>
+              <button type="button" onClick={() => setEditing(null)} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} aria-hidden="true" /></button>
             </div>
 
             <form className="space-y-6 px-5 py-6 sm:px-7" onSubmit={(event) => { event.preventDefault(); commitEditor(); }} noValidate>

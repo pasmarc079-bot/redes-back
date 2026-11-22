@@ -3,6 +3,7 @@ import { FiMapPin } from 'react-icons/fi';
 import Seo from '@/components/Seo';
 import { useSiteStore } from '../stores/siteStore';
 import ResponsiveCover from '@/components/layout/ResponsiveCover';
+import { overlayVeilStyle } from '@/utils/overlayOpacity';
 import { buildMapEmbedUrl, buildMapLink, buildMapQuery } from '@/utils/maps';
 import { useGoogleSummary } from '@/hooks/useGoogleSummary';
 
@@ -25,7 +26,9 @@ export default function About() {
          className="relative overflow-hidden bg-dark py-20 md:py-28"
        >
          <ResponsiveCover desktopImage={settings.about_cover_image_url} mobileImage={settings.about_cover_image_mobile_url} alt="" />
-         {(settings.about_cover_image_url || settings.about_cover_image_mobile_url) && <div className="absolute inset-0 bg-dark/70" aria-hidden="true" />}
+         {(settings.about_cover_image_url || settings.about_cover_image_mobile_url) && (
+           <div className="absolute inset-0 bg-dark" style={overlayVeilStyle(settings.about_cover_overlay_opacity)} aria-hidden="true" />
+         )}
          <div className="container-custom relative z-10 text-center">
           <motion.p
             initial={{ opacity: 0 }}

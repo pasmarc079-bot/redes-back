@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PostEditor from '@/admin/pages/blog/PostEditor';
+import ConfirmModal from '@/admin/components/ui/ConfirmModal';
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
@@ -132,11 +133,11 @@ describe('PostEditor — Cover Image Section', () => {
     await user.click(screen.getByText('Pick Image'));
 
     await waitFor(() => {
-      expect(screen.getByAltText('Portada')).toBeInTheDocument();
+      expect(screen.getByAltText('Portada del artículo')).toBeInTheDocument();
     });
   });
 
-  it('shows preview with hover overlay when cover image is set', async () => {
+  it('keeps the cover actions visible when a cover image is set', async () => {
     const user = userEvent.setup();
     render(<PostEditor />);
 
@@ -144,27 +145,30 @@ describe('PostEditor — Cover Image Section', () => {
     await user.click(screen.getByText('Pick Image'));
 
     await waitFor(() => {
-      expect(screen.getByAltText('Portada')).toBeInTheDocument();
+      expect(screen.getByAltText('Portada del artículo')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Cambiar')).toBeInTheDocument();
-    expect(screen.getByText('Eliminar')).toBeInTheDocument();
+    expect(screen.getByText('Cambiar imagen')).toBeInTheDocument();
+    expect(screen.getByText('Quitar imagen')).toBeInTheDocument();
   });
 
-  it('removes cover image when clicking Eliminar', async () => {
+  it('removes the cover image after confirming in the dialog', async () => {
     const user = userEvent.setup();
-    render(<PostEditor />);
+    render(<><PostEditor /><ConfirmModal /></>);
 
     await user.click(screen.getByText('Elegir de biblioteca'));
     await user.click(screen.getByText('Pick Image'));
 
     await waitFor(() => {
-      expect(screen.getByAltText('Portada')).toBeInTheDocument();
+      expect(screen.getByAltText('Portada del artículo')).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText('Eliminar'));
+    await user.click(screen.getByText('Quitar imagen'));
+    // The confirmation dialog also has a "Quitar imagen" button, so the last one is the confirm.
+    const confirm = screen.getAllByText('Quitar imagen').at(-1)!;
+    await user.click(confirm);
 
-    expect(screen.queryByAltText('Portada')).not.toBeInTheDocument();
+    expect(screen.queryByAltText('Portada del artículo')).not.toBeInTheDocument();
     expect(screen.getByText('Elegir de biblioteca')).toBeInTheDocument();
   });
 });

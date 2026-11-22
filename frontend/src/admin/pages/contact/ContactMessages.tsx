@@ -129,7 +129,7 @@ export default function ContactMessages() {
                       <button
                         type="button"
                         onClick={() => remove(message.id)}
-                        className="min-h-11 min-w-11 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600"
+                        className="icon-btn rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600"
                         aria-label={`Eliminar el mensaje de ${message.name}`}
                       >
                         <FiTrash2 aria-hidden="true" />

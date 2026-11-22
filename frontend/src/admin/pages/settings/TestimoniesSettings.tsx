@@ -218,7 +218,7 @@ export default function TestimoniesSettings() {
                     Visible
                   </label>
                   <button type="button" onClick={() => { setFormError(''); setFieldErrors({}); setEditor({ ...video }); }} className="btn btn-secondary whitespace-nowrap"><FiEdit3 /> Editar</button>
-                  <button type="button" onClick={() => removeVideo(video)} className="min-h-11 min-w-11 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Eliminar ${video.title}`}><FiTrash2 /></button>
+                  <button type="button" onClick={() => removeVideo(video)} className="icon-btn rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" aria-label={`Eliminar ${video.title}`}><FiTrash2 /></button>
                 </div>
               </li>
             ))}
@@ -236,7 +236,7 @@ export default function TestimoniesSettings() {
                   {editor.id ? 'Editar video' : 'Agregar video'}
                 </h4>
               </div>
-              <button type="button" onClick={closeEditor} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} /></button>
+              <button type="button" onClick={closeEditor} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar editor"><FiX size={21} /></button>
             </div>
 
             <form className="space-y-5 px-5 py-6 sm:px-7" onSubmit={(event) => { event.preventDefault(); saveEditor(); }} noValidate>

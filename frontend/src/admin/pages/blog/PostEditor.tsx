@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FiArrowLeft, FiSave, FiAlertCircle, FiImage, FiX } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiAlertCircle, FiImage, FiTrash2, FiX } from 'react-icons/fi';
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -20,6 +20,7 @@ import { getCustomSlashMenuItems } from '@/admin/components/editor/MediaWithText
 import DOMPurify from 'dompurify';
 import MediaUpload from '@/admin/components/upload/MediaUpload';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
+import { showConfirm } from '@/admin/components/ui/ConfirmModal';
 import adminApi from '@/services/adminApi';
 
 const schema = BlockNoteSchema.create({
@@ -54,6 +55,16 @@ export default function PostEditor() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const removeCover = async () => {
+    const confirmed = await showConfirm({
+      title: 'Quitar la imagen de portada',
+      message: 'El artículo quedará sin portada. El archivo se queda en la biblioteca de medios por si lo necesitas otra vez.',
+      confirmLabel: 'Quitar imagen',
+      danger: true,
+    });
+    if (confirmed) setCoverImageUrl('');
+  };
 
   const editor = useCreateBlockNote({
     schema,
@@ -200,8 +211,13 @@ export default function PostEditor() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/admin/dashboard/blog')} className="text-gray-500 hover:text-gray-700">
-          <FiArrowLeft size={20} />
+        <button
+          type="button"
+          onClick={() => navigate('/admin/dashboard/blog')}
+          className="icon-btn text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Volver a la lista de artículos"
+        >
+          <FiArrowLeft size={20} aria-hidden="true" />
         </button>
         <h1 className="font-heading text-2xl font-bold text-gray-800">
           {isEditing ? 'Editar Artículo' : 'Nuevo Artículo'}
@@ -257,27 +273,26 @@ export default function PostEditor() {
             <div className="card p-6">
               <h3 className="font-heading font-semibold text-gray-800 mb-3">Imagen de portada</h3>
               {coverImageUrl ? (
-                <div className="relative group">
+                <div className="space-y-3">
                   <div className="rounded-lg overflow-hidden bg-gray-100 border border-gray-200" style={{ aspectRatio: '16/9' }}>
-                    <img src={coverImageUrl} alt="Portada" className="w-full h-full object-cover" />
+                    <img src={coverImageUrl} alt="Portada del artículo" className="w-full h-full object-cover" />
                   </div>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-lg transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setMediaPickerOpen(true)}
-                        className="bg-white text-gray-800 px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg hover:bg-gray-100 transition-colors"
-                      >
-                        Cambiar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCoverImageUrl('')}
-                        className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-lg hover:bg-red-600 transition-colors"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
+                  {/* Always visible: on a photo, a button that only appears on hover is easy to miss. */}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setMediaPickerOpen(true)}
+                      className="btn btn-secondary min-h-11 flex-1 justify-center text-sm"
+                    >
+                      <FiImage aria-hidden="true" /> Cambiar imagen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeCover}
+                      className="btn min-h-11 flex-1 justify-center border-2 border-red-200 bg-red-50 text-sm font-semibold text-red-700 hover:border-red-300 hover:bg-red-100"
+                    >
+                      <FiTrash2 aria-hidden="true" /> Quitar imagen
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -406,7 +421,7 @@ export default function PostEditor() {
           <div className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
               <h2 id="preview-title" className="font-heading text-xl font-semibold text-gray-800">Vista previa del artículo</h2>
-              <button type="button" onClick={() => setPreviewOpen(false)} className="min-h-11 min-w-11 rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar vista previa"><FiX /></button>
+              <button type="button" onClick={() => setPreviewOpen(false)} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar vista previa"><FiX /></button>
             </div>
             <article className="px-6 py-8 md:px-12">
               <p className="mb-3 text-sm font-medium uppercase tracking-wider text-gold-dark">{formData.status === 'PUBLISHED' ? 'Publicado' : 'Borrador'}</p>
