@@ -97,7 +97,13 @@ export default function CommunityGallery({ variant = 'home' }: CommunityGalleryP
   return (
     <section
       data-nav-theme="light"
-      className={variant === 'home' ? 'bg-cream pt-12 pb-14 md:pt-16 md:pb-16' : 'section-padding bg-cream'}
+      className={
+        variant === 'home'
+          ? 'bg-cream pt-12 pb-14 md:pt-16 md:pb-16'
+          // On Comunidad the testimonies above already end with a large bottom padding and share the
+          // same cream background, so adding section-padding here doubled the gap between them.
+          : 'bg-cream px-4 pb-16 md:px-8 md:pb-24 lg:px-16'
+      }
       aria-labelledby={`gallery-title-${variant}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
