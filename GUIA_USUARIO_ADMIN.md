@@ -515,7 +515,7 @@ Pestañas principales:
 | **text** | Input línea única | Título, eslogan |
 | **textarea** | Área de texto (5 líneas) | Historia, misión, descripción |
 | **image** | Vista previa + [Elegir de biblioteca] / [Quitar] | Hero, portada, foto pastor |
-| **opacity** | Control deslizante 0–100% con vista del valor | Oscuridad de la imagen de portada |
+| **opacity** | Control deslizante 0–100% con vista del valor y vista previa en vivo de la portada | Oscuridad de la imagen de portada |
 | **boolean** | Checkbox | "Mostrar sección Nuestras Redes" |
 
 #### Imágenes en Páginas
@@ -524,6 +524,9 @@ Pestañas principales:
 - Click **[Elegir de biblioteca]** → selecciona de Media Library
 - Click **[Quitar imagen]** → deja campo vacío
 - Cada portada tiene además **“Oscuridad de la imagen de portada”**: 0% deja la foto clara y 100% la oscurece al máximo. El valor se guarda junto con la página en **[Guardar cambios]**.
+- Encima del control verás **“Vista previa de la portada”**: la franja real de la portada con la foto, el texto en dorado que verá el visitante y la oscuridad elegida. Cambia mientras mueves el control, así que **no hace falta guardar ni abrir el sitio público** para saber cómo queda.
+  - Con **Computadora / Celular** comparas las dos versiones; recuerda que si solo tienes una foto, se usa en las dos.
+  - Si la portada todavía no tiene foto, la vista previa lo avisa en lugar de mostrar un cuadro vacío.
 
 #### Misión, Visión y Propósito
 
@@ -787,6 +790,8 @@ La base de datos (PostgreSQL en Seenode) tiene backups automáticos diarios. Las
 | 1.0 | Oct 2026 | Guía inicial completa |
 | 1.1 | Nov 2026 | Horarios editables (servicios y reuniones), métricas animadas del inicio, galería de la comunidad, Misión/Visión/Propósito editables, opacidad de portadas reutilizable, corrección de la zona horaria de eventos, botón claro “Quitar imagen” en eventos y blog, e iconos centrados en los botones del panel |
 | 1.2 | Nov 2026 | “Nuestra comunidad en fotos” pasa de una foto gigante a una tira horizontal con varias fotos visibles a la vez (5/4/3/2/1 según pantalla), conservando el avance automático, pausa, flechas y puntos |
+| 1.3 | Nov 2026 | Vista previa en vivo de la portada al ajustar la oscuridad de la imagen en Configuración → Páginas (computadora y celular), sin guardar ni salir del panel |
+| 1.4 | Nov 2026 | La oscuridad de portada ahora se puede ajustar en todas las páginas (Eventos, Blog, Comunidad y Contacto incluidos): antes el control no se movía si esa página todavía no tenía un valor guardado |
 
 ---
 

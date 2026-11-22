@@ -21,7 +21,7 @@ export default function OverlayOpacityField({
   value,
   onChange,
   label = 'Oscuridad sobre la imagen',
-  help = 'Qué tanto se oscurece la foto detrás del texto. Si la bajas, la foto se ve más clara y luminosa.',
+  help = 'Qué tanto se oscurece la foto detrás del texto. Si la bajas, la foto se ve más clara y luminosa. La vista previa de arriba cambia al instante.',
   warnBelow = 40,
 }: OverlayOpacityFieldProps) {
   const helpId = `${id}-help`;

@@ -10,6 +10,7 @@ import MetricsSettings from './MetricsSettings';
 import GallerySettings from './GallerySettings';
 import ServicesSettings from './ServicesSettings';
 import OverlayOpacityField from '@/admin/components/ui/OverlayOpacityField';
+import CoverPreview from '@/admin/components/ui/CoverPreview';
 import { DEFAULT_COVER_OVERLAY_OPACITY, clampOverlayOpacity } from '@/utils/overlayOpacity';
 import { getSitePage, type SitePageId } from '@/config/sitePages';
 import { parseHeroSlides } from '@/utils/heroSlides';
@@ -88,7 +89,7 @@ const pages: PageDefinition[] = [
       { key: 'about_page_title', label: 'Título principal', source: 'content', type: 'text' },
       { key: 'about_cover_image_url', label: 'Imagen que se muestra para computadores', source: 'setting', type: 'image' },
       { key: 'about_cover_image_mobile_url', label: 'Imagen para dispositivos móviles', source: 'setting', type: 'image' },
-      { key: 'about_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity', help: '0% deja la foto clara y 100% la oscurece al máximo. Se aplica igual en computadora y celular.' },
+      { key: 'about_cover_overlay_opacity', label: 'Oscuridad de la imagen de portada', source: 'setting', type: 'opacity', help: '0% deja la foto clara y 100% la oscurece al máximo. Se aplica igual en computadora y celular; la vista previa de abajo se actualiza mientras mueves el control.' },
       { key: 'about_intro', label: 'Historia / Introducción', source: 'content', type: 'textarea' },
       { key: 'church_history', label: 'Historia del ministerio', source: 'setting', type: 'textarea' },
       { key: 'mission', label: 'Misión', source: 'setting', type: 'textarea', help: 'Se muestra en Inicio (Nuestra Iglesia) y en Nosotros.' },
@@ -139,6 +140,18 @@ const pages: PageDefinition[] = [
 ];
 
 const pageById = Object.fromEntries(pages.map(page => [page.id, page])) as Record<PageId, PageDefinition>;
+
+/**
+ * The words each cover shows over the photo, with the same keys the public pages read.
+ * The preview draws them so the editor sees the real cover, not a made-up sample.
+ */
+const COVER_PREVIEW_TEXT: Partial<Record<PageId, { eyebrow?: string; eyebrowKey?: string; titleKey?: string; titleFallback: string }>> = {
+  about: { eyebrowKey: 'about_eyebrow', eyebrow: 'Quiénes Somos', titleKey: 'about_page_title', titleFallback: 'Nosotros' },
+  events: { eyebrowKey: 'events_page_description', eyebrow: 'Únete a nosotros', titleKey: 'events_page_title', titleFallback: 'Eventos' },
+  blog: { eyebrowKey: 'blog_page_description', eyebrow: 'Reflexiones y Noticias', titleKey: 'blog_page_title', titleFallback: 'Blog' },
+  community: { eyebrow: 'Comunidad', titleKey: 'community_page_title', titleFallback: 'Únete a Nosotros' },
+  contact: { eyebrow: 'Estamos aquí para ti', titleFallback: 'Contacto' },
+};
 
 /** Cover fields kept for older setups. They are ignored while the cover has messages of its own. */
 const LEGACY_HERO_FIELD_KEYS = new Set([
@@ -194,8 +207,22 @@ export default function Settings() {
     ? getSetting(field.key)
     : getContent(field.key)?.body || '';
 
+  const coverPreviewText = (pageId: PageId) => {
+    const meta = COVER_PREVIEW_TEXT[pageId];
+    if (!meta) return { eyebrow: '', title: pageById[pageId].label };
+    return {
+      eyebrow: meta.eyebrowKey ? getContent(meta.eyebrowKey)?.body || meta.eyebrow || '' : meta.eyebrow || '',
+      title: meta.titleKey ? getContent(meta.titleKey)?.body || meta.titleFallback : meta.titleFallback,
+    };
+  };
+
+  // Older databases do not have every setting yet (for example a cover opacity for a page that
+  // never saved one). Without adding the row here, the control would ignore the new value and the
+  // slider would look stuck, so new keys are added to the local list and saved with the page.
   const updateSetting = (key: string, value: string) => {
-    setSettings(current => current.map(item => item.key === key ? { ...item, value } : item));
+    setSettings(current => current.some(item => item.key === key)
+      ? current.map(item => item.key === key ? { ...item, value } : item)
+      : [...current, { key, value }]);
   };
 
   const updateContent = (key: string, value: string) => {
@@ -470,13 +497,22 @@ export default function Settings() {
                       {getFieldValue(field) && <button type="button" className="ml-2 min-h-11 rounded-lg px-3 text-sm text-red-500 hover:bg-red-50" onClick={() => updateSetting(field.key, '')}><FiTrash2 className="inline" /> Quitar imagen</button>}
                     </div>
                   ) : field.type === 'opacity' ? (
-                    <OverlayOpacityField
-                      id={`page-field-${field.key}`}
-                      label={field.label}
-                      help={field.help}
-                      value={clampOverlayOpacity(getFieldValue(field), DEFAULT_COVER_OVERLAY_OPACITY)}
-                      onChange={value => updateSetting(field.key, String(value))}
-                    />
+                    <div className="space-y-4">
+                      <CoverPreview
+                        desktopImage={getSetting(field.key.replace(/_overlay_opacity$/, '_image_url'))}
+                        mobileImage={getSetting(field.key.replace(/_overlay_opacity$/, '_image_mobile_url'))}
+                        opacity={clampOverlayOpacity(getFieldValue(field), DEFAULT_COVER_OVERLAY_OPACITY)}
+                        eyebrow={coverPreviewText(selectedDefinition.id).eyebrow}
+                        title={coverPreviewText(selectedDefinition.id).title}
+                      />
+                      <OverlayOpacityField
+                        id={`page-field-${field.key}`}
+                        label={field.label}
+                        help={field.help}
+                        value={clampOverlayOpacity(getFieldValue(field), DEFAULT_COVER_OVERLAY_OPACITY)}
+                        onChange={value => updateSetting(field.key, String(value))}
+                      />
+                    </div>
                   ) : field.type === 'boolean' ? (
                     <label className="flex min-h-11 items-center gap-3 text-sm text-gray-700">
                       <input id={`page-field-${field.key}`} type="checkbox" checked={getFieldValue(field) !== 'false'} onChange={event => updateField(field, String(event.target.checked))} className="rounded border-gray-300 text-gold focus:ring-gold/20" />

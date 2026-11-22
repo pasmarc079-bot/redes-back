@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Settings from '@/admin/pages/settings/Settings';
 
@@ -107,6 +107,28 @@ describe('Configuración de Páginas', () => {
     await waitFor(() => expect(putMock).toHaveBeenCalledWith('/site/pages/home', expect.objectContaining({
       settings: expect.any(Object),
       content: expect.arrayContaining([{ key: 'hero_title', body: 'Nueva portada' }]),
+    })));
+  });
+
+  it('mueve el control de oscuridad de una portada que aún no tiene valor guardado', async () => {
+    const user = userEvent.setup();
+    render(<Settings />);
+
+    await waitFor(() => expect(screen.getAllByRole('button', { name: 'Editar Contenido' })).toHaveLength(6));
+    // Eventos: su oscuridad todavía no existe en la base, como en las instalaciones antiguas.
+    await user.click(screen.getAllByRole('button', { name: 'Editar Contenido' })[2]);
+
+    const slider = screen.getByRole('slider');
+    expect(slider).toHaveValue('70');
+
+    fireEvent.change(slider, { target: { value: '35' } });
+
+    expect(slider).toHaveValue('35');
+    expect(slider.closest('.field-group')?.querySelector('output')).toHaveTextContent('35%');
+
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }));
+    await waitFor(() => expect(putMock).toHaveBeenCalledWith('/site/pages/events', expect.objectContaining({
+      settings: expect.objectContaining({ events_cover_overlay_opacity: '35' }),
     })));
   });
 
