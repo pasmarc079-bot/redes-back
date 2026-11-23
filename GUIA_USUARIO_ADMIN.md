@@ -561,14 +561,23 @@ Menú **Configuración → pestaña Horarios**. Esta lista alimenta dos lugares 
 
 Los números que se ven en el inicio, entre **“Nuestra Iglesia”** y **“Lo que dice nuestra comunidad”**. Se animan de 0 hasta su valor cuando el visitante llega a esa sección.
 
+Se ven en una tabla compacta con una fila por número: **Número | Sufijo | Etiqueta | Acciones**. La columna **Número** ya muestra la cifra como se verá en el inicio (por ejemplo `500+`).
+
 | Campo | Qué escribir | Ejemplo |
 |-------|--------------|---------|
 | **Número** | Solo cifras, sin puntos ni comas | `500` |
 | **Sufijo** | Lo que va pegado al número (puede ir vacío) | `+` |
 | **Etiqueta** | Texto debajo del número | `Eventos realizados` |
 
-- **[Agregar métrica]** hasta 8; **[Guardar métricas]** publica los cambios.
-- Las flechas ↑↓ cambian el orden.
+| Acción | Cómo |
+|--------|------|
+| **Agregar** | **[Agregar métrica]** abre una ventana con los tres campos y una vista previa del número. Pulsa **Agregar métrica** y queda guardada |
+| **Editar** | Icono ✏️ de la fila → misma ventana, con los valores ya cargados |
+| **Ordenar** | Flechas ↑↓ de la fila; el primero se ve primero |
+| **Quitar** | Icono 🗑 → confirma en el modal |
+
+- Cada cambio (agregar, editar, mover o quitar) **se guarda al instante**: no hay botón de guardar pendiente.
+- El inicio admite hasta **8 números, en dos filas de cuatro**. Si ya hay 8, el botón sigue activo y al pulsarlo explica el máximo y que hay que quitar una métrica para agregar otra.
 - Si borras todas, el inicio vuelve a mostrar las cifras iniciales (10, 500, 100 y 200).
 
 ---
@@ -797,6 +806,7 @@ La base de datos (PostgreSQL en Seenode) tiene backups automáticos diarios. Las
 | 1.2 | Nov 2026 | “Nuestra comunidad en fotos” pasa de una foto gigante a una tira horizontal con varias fotos visibles a la vez (5/4/3/2/1 según pantalla), conservando el avance automático, pausa, flechas y puntos |
 | 1.3 | Nov 2026 | Vista previa en vivo de la portada al ajustar la oscuridad de la imagen en Configuración → Páginas (computadora y celular), sin guardar ni salir del panel |
 | 1.4 | Nov 2026 | La oscuridad de portada ahora se puede ajustar en todas las páginas (Eventos, Blog, Comunidad y Contacto incluidos): antes el control no se movía si esa página todavía no tenía un valor guardado |
+| 1.6 | Nov 2026 | Métricas del inicio: tabla compacta (número, sufijo, etiqueta y acciones), agregar o editar en una ventana con vista previa y guardado al instante. El máximo de 8 ya no deshabilita el botón sin explicación: al pulsarlo se indica el límite y cómo seguir. Galería: la ventana de foto ahora muestra la foto en su recorte real con el texto sobre la foto aplicado, y se rediseñó el modal (cabecera, campos y pie de acciones) |
 | 1.5 | Nov 2026 | Galería de la comunidad: las fotos se ven en una tabla compacta (foto, texto alternativo, texto sobre la foto y acciones), agregar o editar abre una ventana propia y cada cambio se guarda al instante. Se eliminó el límite de 12 fotos que dejaba el botón “Agregar foto” deshabilitado sin explicación |
 
 ---

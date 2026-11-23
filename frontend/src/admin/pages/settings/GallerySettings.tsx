@@ -8,9 +8,9 @@ import {
   FiPlus,
   FiSave,
   FiTrash2,
-  FiX,
 } from 'react-icons/fi';
 import { showConfirm } from '@/admin/components/ui/ConfirmModal';
+import EditorModal from '@/admin/components/ui/EditorModal';
 import MediaPicker from '@/admin/components/ui/MediaPicker';
 import { showToast } from '@/admin/components/ui/Toast';
 import { siteApi } from '@/services/api';
@@ -62,17 +62,6 @@ export default function GallerySettings() {
       .catch(() => showToast('error', 'No se pudo cargar la galería.'))
       .finally(() => setLoading(false));
   }, []);
-
-  useEffect(() => {
-    if (!editor) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape' || pickerOpen) return;
-      setEditor(null);
-      setEditorError('');
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editor, pickerOpen]);
 
   const persist = async (next: GalleryImage[], message: string) => {
     setSaving(true);
@@ -361,120 +350,130 @@ export default function GallerySettings() {
       </section>
 
       {editor && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="gallery-photo-title"
-          onClick={closeEditor}
-        >
-          <div
-            className="max-h-[94vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-gold-dark">
-                  {editor.index === null ? 'Nueva foto' : `Foto ${editor.index + 1} de ${images.length}`}
-                </p>
-                <h4 id="gallery-photo-title" className="mt-1 font-heading text-lg font-semibold text-gray-800">
-                  {editor.index === null ? 'Agregar foto al carrusel' : 'Editar foto del carrusel'}
-                </h4>
-              </div>
-              <button type="button" onClick={closeEditor} className="icon-btn rounded-lg text-gray-500 hover:bg-gray-100" aria-label="Cerrar">
-                <FiX size={20} aria-hidden="true" />
+        <EditorModal
+          open
+          title={editor.index === null ? 'Agregar foto al carrusel' : 'Editar foto del carrusel'}
+          subtitle={editor.index === null
+            ? `${images.length} ${images.length === 1 ? 'foto' : 'fotos'} en el carrusel. La nueva se suma al final.`
+            : `Foto ${editor.index + 1} de ${images.length} en el carrusel.`}
+          onClose={closeEditor}
+          closeOnEscape={!pickerOpen}
+          note="Se guarda al instante."
+          actions={(
+            <>
+              <button type="button" className="btn btn-secondary" onClick={closeEditor}>Cancelar</button>
+              <button type="button" className="btn btn-primary" onClick={saveEditor} disabled={saving}>
+                {saving ? 'Guardando...' : editor.index === null ? 'Agregar foto' : 'Guardar foto'}
               </button>
-            </div>
+            </>
+          )}
+        >
+          <form
+            className="space-y-5"
+            onSubmit={(event) => { event.preventDefault(); saveEditor(); }}
+            noValidate
+          >
+            {editorError && (
+              <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{editorError}</p>
+            )}
 
-            <form
-              className="space-y-5 px-5 py-5"
-              onSubmit={(event) => { event.preventDefault(); saveEditor(); }}
-              noValidate
-            >
-              {editorError && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{editorError}</p>}
-
+            <div className="grid gap-5 sm:grid-cols-[9rem_1fr]">
               <div>
-                <p className="label mb-2">Foto</p>
                 {editor.draft.imageUrl ? (
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={editor.draft.imageUrl}
-                      alt=""
-                      className="h-32 w-28 shrink-0 rounded-lg border border-gray-200 bg-dark object-cover"
-                    />
-                    <div>
-                      <button type="button" className="btn btn-secondary" onClick={() => setPickerOpen(true)}>
-                        <FiFolder aria-hidden="true" /> Cambiar foto
-                      </button>
-                      <p className="mt-2 text-xs text-gray-500">En el carrusel se recorta en vertical (4:5).</p>
+                  <>
+                    {/* The same 4:5 crop and caption strip the carousel uses, so the texts are judged in place. */}
+                    <div className="relative overflow-hidden rounded-xl bg-dark">
+                      <img
+                        src={editor.draft.imageUrl}
+                        alt=""
+                        className="aspect-[4/5] w-full object-cover"
+                      />
+                      {editor.draft.caption.trim() && (
+                        <p className="absolute inset-x-0 bottom-0 bg-dark/85 px-2 py-1.5 text-[11px] leading-snug text-white">
+                          {editor.draft.caption.trim()}
+                        </p>
+                      )}
                     </div>
-                  </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary mt-2 w-full px-3 text-xs"
+                      onClick={() => setPickerOpen(true)}
+                    >
+                      <FiFolder aria-hidden="true" /> Cambiar foto
+                    </button>
+                  </>
                 ) : (
                   <button
                     type="button"
                     autoFocus
                     onClick={() => setPickerOpen(true)}
-                    className="flex w-full flex-col items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center text-sm text-gray-600 hover:border-gold focus-visible:border-gold"
+                    className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-3 text-center text-sm text-gray-600 transition-colors hover:border-gold hover:bg-gold/5"
                   >
-                    <FiImage size={24} aria-hidden="true" />
+                    <FiImage size={22} aria-hidden="true" />
                     <span className="font-semibold text-gray-800">Elegir foto de la biblioteca</span>
-                    <span className="text-xs text-gray-500">Desde ahí también puedes subir una imagen nueva.</span>
+                    <span className="text-xs leading-snug text-gray-500">También puedes subir una nueva desde ahí.</span>
                   </button>
                 )}
               </div>
 
-              <div className="field-group">
-                <label className="label" htmlFor="gallery-photo-alt">Texto alternativo</label>
-                <p className="mb-2 text-xs text-gray-500">Describe la foto para quienes usan lector de pantalla. Ejemplo: “Jóvenes en el retiro”.</p>
-                <input
-                  id="gallery-photo-alt"
-                  type="text"
-                  maxLength={120}
-                  className="input w-full"
-                  value={editor.draft.alt}
-                  onChange={(event) => setEditor((current) => current && {
-                    ...current,
-                    draft: { ...current.draft, alt: event.target.value },
-                  })}
-                  placeholder="Jóvenes en el retiro de la iglesia"
-                />
-                {!editor.draft.alt.trim() && (
-                  <p className="mt-1 text-xs text-amber-700">
-                    Si lo dejas vacío, el lector de pantalla solo dirá “Foto de la comunidad del Ministerio REDES”.
+              <div className="space-y-5">
+                <div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <label className="label mb-0" htmlFor="gallery-photo-alt">Texto alternativo</label>
+                    <span className="text-xs tabular-nums text-gray-400">{editor.draft.alt.length}/120</span>
+                  </div>
+                  <input
+                    id="gallery-photo-alt"
+                    type="text"
+                    maxLength={120}
+                    className="input mt-1.5 w-full"
+                    value={editor.draft.alt}
+                    onChange={(event) => setEditor((current) => current && {
+                      ...current,
+                      draft: { ...current.draft, alt: event.target.value },
+                    })}
+                    placeholder="Jóvenes en el retiro de la iglesia"
+                    aria-describedby="gallery-photo-alt-help"
+                  />
+                  {editor.draft.alt.trim() ? (
+                    <p id="gallery-photo-alt-help" className="mt-1 text-xs text-gray-500">
+                      Describe la foto para quienes usan lector de pantalla.
+                    </p>
+                  ) : (
+                    <p id="gallery-photo-alt-help" className="mt-1 text-xs text-amber-700">
+                      Si lo dejas vacío, el lector de pantalla solo dirá “Foto de la comunidad del Ministerio REDES”.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <label className="label mb-0" htmlFor="gallery-photo-caption">
+                      Texto sobre la foto <span className="font-normal text-gray-400">(opcional)</span>
+                    </label>
+                    <span className="text-xs tabular-nums text-gray-400">{editor.draft.caption.length}/160</span>
+                  </div>
+                  <input
+                    id="gallery-photo-caption"
+                    type="text"
+                    maxLength={160}
+                    className="input mt-1.5 w-full"
+                    value={editor.draft.caption}
+                    onChange={(event) => setEditor((current) => current && {
+                      ...current,
+                      draft: { ...current.draft, caption: event.target.value },
+                    })}
+                    placeholder="Aprender y crecer en comunidad"
+                    aria-describedby="gallery-photo-caption-help"
+                  />
+                  <p id="gallery-photo-caption-help" className="mt-1 text-xs text-gray-500">
+                    Aparece en la franja oscura sobre la foto. Se ve en la vista previa.
                   </p>
-                )}
-              </div>
-
-              <div className="field-group">
-                <label className="label" htmlFor="gallery-photo-caption">
-                  Texto sobre la foto <span className="font-normal text-gray-400">(opcional)</span>
-                </label>
-                <p className="mb-2 text-xs text-gray-500">Aparece en una franja oscura encima de la foto, en el carrusel.</p>
-                <input
-                  id="gallery-photo-caption"
-                  type="text"
-                  maxLength={160}
-                  className="input w-full"
-                  value={editor.draft.caption}
-                  onChange={(event) => setEditor((current) => current && {
-                    ...current,
-                    draft: { ...current.draft, caption: event.target.value },
-                  })}
-                />
-              </div>
-
-              <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-gray-500">Se guarda al instante, sin pasos extra.</p>
-                <div className="flex flex-col-reverse gap-3 sm:flex-row">
-                  <button type="button" className="btn btn-secondary" onClick={closeEditor}>Cancelar</button>
-                  <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? 'Guardando...' : editor.index === null ? 'Agregar foto' : 'Guardar foto'}
-                  </button>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+          </form>
+        </EditorModal>
       )}
 
       <MediaPicker
