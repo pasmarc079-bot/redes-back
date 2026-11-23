@@ -577,14 +577,19 @@ Los números que se ven en el inicio, entre **“Nuestra Iglesia”** y **“Lo 
 
 Tira horizontal de fotos que avanza sola, **arriba de “Nuestras redes”** en el inicio y en la página Comunidad. A diferencia de un carrusel de una sola foto, aquí se ven **varias fotos a la vez**: 5 en pantallas grandes, 4 en portátiles, 3 en tablet, 2 en tablet pequeña y 1 en celular.
 
+Las fotos se ven en una tabla compacta con una fila por foto: **Foto | Texto alternativo | Texto sobre la foto | Acciones**. No hay límite de fotos: puedes agregar todas las que necesites.
+
 | Acción | Cómo |
 |--------|------|
-| **Agregar foto** | **[Agregar foto]** → **[Elegir foto]** (biblioteca de medios) |
-| **Texto alternativo** | Describe la foto para lectores de pantalla (ej. “Jóvenes en el retiro”) |
+| **Agregar foto** | **[Agregar foto]** abre una ventana: elige la foto de la biblioteca (o sube una nueva), escribe sus textos y pulsa **Agregar foto** |
+| **Editar** | Icono ✏️ de la fila → misma ventana, con los textos ya cargados |
+| **Texto alternativo** | Describe la foto para lectores de pantalla (ej. “Jóvenes en el retiro”). Si falta, la fila lo avisa en ámbar |
 | **Texto sobre la foto** | Opcional; aparece en una franja oscura sobre la imagen |
-| **Ordenar** | Flechas ↑↓ (también define qué fotos se ven primero) |
+| **Ordenar** | Flechas ↑↓ de la fila (también define qué fotos se ven primero) |
 | **Quitar** | Icono 🗑 → confirma en el modal (el archivo queda en la biblioteca) |
-| **Ritmo** | “Segundos entre fotos”: 0 significa que no avanza sola |
+| **Ritmo** | “Segundos entre fotos”: 0 significa que no avanza sola. Tiene su propio botón **Guardar cambio automático** |
+
+Cada foto se guarda al instante: al agregarla, editarla, moverla o quitarla el panel confirma con un aviso y el sitio lo muestra al recargar. No hay que pulsar “Guardar galería” ni esperar a terminar la lista.
 
 La tira se mueve de una foto por vez y se detiene cuando el visitante pasa el mouse o navega con teclado; tiene botón de pausa, flechas y puntos (cada punto es un grupo de fotos, no una foto suelta). Sin fotos, la sección no se muestra. Si hay menos fotos que el espacio disponible, no se muestran flechas ni puntos.
 
@@ -792,6 +797,7 @@ La base de datos (PostgreSQL en Seenode) tiene backups automáticos diarios. Las
 | 1.2 | Nov 2026 | “Nuestra comunidad en fotos” pasa de una foto gigante a una tira horizontal con varias fotos visibles a la vez (5/4/3/2/1 según pantalla), conservando el avance automático, pausa, flechas y puntos |
 | 1.3 | Nov 2026 | Vista previa en vivo de la portada al ajustar la oscuridad de la imagen en Configuración → Páginas (computadora y celular), sin guardar ni salir del panel |
 | 1.4 | Nov 2026 | La oscuridad de portada ahora se puede ajustar en todas las páginas (Eventos, Blog, Comunidad y Contacto incluidos): antes el control no se movía si esa página todavía no tenía un valor guardado |
+| 1.5 | Nov 2026 | Galería de la comunidad: las fotos se ven en una tabla compacta (foto, texto alternativo, texto sobre la foto y acciones), agregar o editar abre una ventana propia y cada cambio se guarda al instante. Se eliminó el límite de 12 fotos que dejaba el botón “Agregar foto” deshabilitado sin explicación |
 
 ---
 

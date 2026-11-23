@@ -6,7 +6,6 @@ export interface GalleryImage {
   caption: string;
 }
 
-export const MAX_GALLERY_IMAGES = 12;
 export const DEFAULT_GALLERY_INTERVAL_SECONDS = 5;
 
 const text = (value: unknown, max: number) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -24,7 +23,7 @@ export function parseGalleryImages(raw?: string | null): GalleryImage[] {
   }
   if (!Array.isArray(data)) return [];
 
-  return data.slice(0, MAX_GALLERY_IMAGES).flatMap((item, index): GalleryImage[] => {
+  return data.flatMap((item, index): GalleryImage[] => {
     if (!item || typeof item !== 'object') return [];
     const record = item as Record<string, unknown>;
     const imageUrl = safeHref(text(record.imageUrl, 1000));

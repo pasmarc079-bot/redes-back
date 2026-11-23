@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 export const MAX_HERO_SLIDES = 5;
 export const MAX_SITE_METRICS = 8;
-export const MAX_GALLERY_IMAGES = 12;
 
 const firstIssue = (error: z.ZodError) => error.issues[0]?.message ?? 'Datos no válidos';
 
@@ -104,7 +103,8 @@ const galleryImageSchema = z.object({
   caption: z.string().trim().max(160, 'El texto de la imagen admite 160 caracteres.').default(''),
 });
 
-const gallerySchema = z.array(galleryImageSchema).max(MAX_GALLERY_IMAGES, `Puedes subir hasta ${MAX_GALLERY_IMAGES} imágenes.`);
+// Sin límite fijo: la galería crece con el ministerio. El tamaño lo controla quien administra.
+const gallerySchema = z.array(galleryImageSchema);
 
 interface SettingDefinition {
   label: string;
